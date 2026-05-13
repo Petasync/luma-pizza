@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
+import DeliveryMarquee from '@/components/delivery-marquee'
+import DeliveryBanner from '@/components/delivery-banner'
 import { HERO_IMAGE, STORY_IMAGE, KITCHEN_IMAGE, GALLERY_IMAGES, getCategoryImage } from '@/lib/images'
 
 const FEATURED_CATEGORIES = [
@@ -73,6 +75,9 @@ export default function HomePage() {
           <div className="w-px h-8 bg-gold-400/60"></div>
         </div>
       </section>
+
+      {/* DELIVERY MARQUEE */}
+      <DeliveryMarquee />
 
       {/* INFO STRIP */}
       <section className="bg-charcoal-900 text-cream-100 py-6 border-t border-gold-700/30">
@@ -182,25 +187,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* GOLD CTA BAND */}
-      <section className="bg-gold-500 py-12">
-        <div className="container-wide px-4 sm:px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="text-[11px] uppercase tracking-widest text-charcoal-700 mb-2">
-              Direkt nach Hause
-            </p>
-            <h3 className="font-serif text-2xl md:text-3xl text-charcoal-900">
-              Lieferung in 90599 — ohne Liefergebühr.
-            </h3>
-          </div>
-          <Link
-            href="/bestellen"
-            className="bg-charcoal-900 text-cream-50 px-7 py-3.5 text-sm font-medium tracking-wider uppercase hover:bg-charcoal-700 transition-colors whitespace-nowrap"
-          >
-            Bestellung aufgeben
-          </Link>
-        </div>
-      </section>
+      {/* DELIVERY BANNER */}
+      <DeliveryBanner />
 
       {/* KITCHEN / SECOND STORY */}
       <section className="section-padding">

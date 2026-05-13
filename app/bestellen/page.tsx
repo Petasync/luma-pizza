@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Navbar from '@/components/navbar'
+import DeliveryMarquee from '@/components/delivery-marquee'
 import CategoryTabs from '@/components/menu/category-tabs'
 import MenuGrid from '@/components/menu/menu-grid'
 import CartSidebar from '@/components/cart/cart-sidebar'
@@ -13,6 +14,8 @@ export default function BestellenPage() {
     <>
       <Navbar />
       <main className="pt-20 min-h-screen bg-cream-50">
+        <DeliveryMarquee />
+
         {/* Header */}
         <section className="bg-charcoal-900 text-cream-50 py-16 px-4 sm:px-6 lg:px-12">
           <div className="container-wide text-center">
