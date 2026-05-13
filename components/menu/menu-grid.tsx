@@ -9,8 +9,11 @@ export default function MenuGrid({ category }: Props) {
   const items = getItemsByCategory(category)
   return (
     <div>
-      <h2 className="font-bold text-lg text-gray-900 mb-4">{category}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="mb-8">
+        <p className="eyebrow mb-2">Kategorie</p>
+        <h2 className="heading-serif text-3xl">{category}</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {items.map(item => (
           <MenuItemCard key={item.id} item={item} />
         ))}

@@ -9,6 +9,7 @@ import ContactForm, { ContactData } from '@/components/checkout/contact-form'
 import StripePayment from '@/components/checkout/stripe-payment'
 import PayPalButton from '@/components/checkout/paypal-button'
 import { OrderType, PaymentMethod } from '@/lib/types'
+import Link from 'next/link'
 
 type Step = 'delivery' | 'contact' | 'payment'
 
@@ -56,8 +57,13 @@ export default function CheckoutPage() {
     return (
       <>
         <Navbar />
-        <main className="max-w-2xl mx-auto px-4 py-12 text-center">
-          <p className="text-gray-500">Dein Warenkorb ist leer.</p>
+        <main className="pt-20 min-h-screen flex items-center justify-center">
+          <div className="text-center px-6">
+            <p className="eyebrow mb-4">Warenkorb leer</p>
+            <h1 className="heading-serif text-3xl text-charcoal-900 mb-3">Dein Warenkorb ist leer.</h1>
+            <p className="text-charcoal-600 mb-8">Wähle ein paar leckere Gerichte aus unserer Karte.</p>
+            <Link href="/bestellen" className="btn-primary">Zur Speisekarte</Link>
+          </div>
         </main>
       </>
     )
@@ -66,99 +72,150 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
-        <h1 className="text-2xl font-black text-gray-900">Kasse</h1>
-
-        <section className="bg-white border border-gray-200 rounded-lg p-6">
-          <DeliveryToggle value={orderType} onChange={v => { setOrderType(v); setPlzConfirmed(false); setStep('delivery') }} />
-          {orderType === 'delivery' && !plzConfirmed && (
-            <div className="mt-4">
-              <PostalCheck onConfirm={plz => { setPostalCode(plz); setPlzConfirmed(true); setStep('contact') }} />
-            </div>
-          )}
-          {(orderType === 'pickup' || plzConfirmed) && (
-            <p className="mt-3 text-sm text-green-600 font-medium">
-              {orderType === 'pickup' ? '✓ Abholung ausgewählt' : `✓ Lieferung nach ${postalCode}`}
-            </p>
-          )}
+      <main className="pt-20 min-h-screen bg-cream-100">
+        <section className="bg-charcoal-900 text-cream-50 py-12 px-4 sm:px-6 lg:px-12">
+          <div className="container-narrow text-center">
+            <p className="eyebrow text-gold-400 mb-3">Kasse</p>
+            <h1 className="heading-serif text-4xl">Fast geschafft.</h1>
+          </div>
         </section>
 
-        {(orderType === 'pickup' || plzConfirmed) && (
-          <section className="bg-white border border-gray-200 rounded-lg p-6">
-            <ContactForm data={contact} onChange={setContact} showAddress={orderType === 'delivery'} />
-            <button
-              onClick={() => {
-                if (!contact.name || !contact.email || !contact.phone) { setError('Bitte alle Pflichtfelder ausfüllen.'); return }
-                if (orderType === 'delivery' && !contact.street) { setError('Bitte Straße angeben.'); return }
-                setError('')
-                setStep('payment')
-              }}
-              className="mt-4 bg-primary text-white font-semibold px-6 py-2 rounded hover:bg-primary-dark transition-colors"
-            >
-              Weiter zur Zahlung →
-            </button>
-            {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-          </section>
-        )}
+        <div className="container-narrow px-4 sm:px-6 lg:px-12 py-12 grid lg:grid-cols-3 gap-8">
+          {/* Steps */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Step 1 */}
+            <section className="bg-cream-50 border border-charcoal-900/10 p-8">
+              <DeliveryToggle value={orderType} onChange={v => { setOrderType(v); setPlzConfirmed(false); setStep('delivery') }} />
+              {orderType === 'delivery' && !plzConfirmed && (
+                <PostalCheck onConfirm={plz => { setPostalCode(plz); setPlzConfirmed(true); setStep('contact') }} />
+              )}
+              {(orderType === 'pickup' || plzConfirmed) && (
+                <p className="mt-6 pt-6 border-t border-charcoal-900/10 text-sm text-gold-600 font-medium flex items-center gap-2">
+                  <span className="inline-block w-4 h-px bg-gold-600" />
+                  {orderType === 'pickup' ? 'Abholung in unserem Restaurant' : `Lieferung an PLZ ${postalCode}`}
+                </p>
+              )}
+            </section>
 
-        {step === 'payment' && (
-          <section className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-            <h2 className="font-bold text-gray-900">Zahlung</h2>
+            {/* Step 2 */}
+            {(orderType === 'pickup' || plzConfirmed) && (
+              <section className="bg-cream-50 border border-charcoal-900/10 p-8">
+                <ContactForm data={contact} onChange={setContact} showAddress={orderType === 'delivery'} />
+                {step !== 'payment' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (!contact.name || !contact.email || !contact.phone) { setError('Bitte alle Pflichtfelder ausfüllen.'); return }
+                        if (orderType === 'delivery' && !contact.street) { setError('Bitte Straße angeben.'); return }
+                        setError('')
+                        setStep('payment')
+                      }}
+                      className="mt-6 btn-primary"
+                    >
+                      Weiter zur Zahlung
+                    </button>
+                    {error && <p className="text-wine-600 text-sm mt-3">{error}</p>}
+                  </>
+                )}
+              </section>
+            )}
 
-            <div className="bg-gray-50 rounded p-4 text-sm space-y-1">
+            {/* Step 3 */}
+            {step === 'payment' && (
+              <section className="bg-cream-50 border border-charcoal-900/10 p-8 space-y-6">
+                <div>
+                  <p className="eyebrow mb-3">Schritt 3</p>
+                  <h2 className="font-serif text-2xl text-charcoal-900 mb-5">Zahlungsmethode</h2>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { m: 'card' as const, label: 'Karte / Klarna' },
+                    { m: 'paypal' as const, label: 'PayPal' },
+                    { m: 'cash' as const, label: 'Bar' },
+                  ]).map(({ m, label }) => (
+                    <button
+                      key={m}
+                      onClick={() => setPaymentMethod(m)}
+                      className={`py-4 px-3 text-xs uppercase tracking-widest border transition-all ${
+                        paymentMethod === m
+                          ? 'bg-charcoal-900 text-cream-50 border-charcoal-900'
+                          : 'bg-cream-50 text-charcoal-700 border-charcoal-900/15 hover:border-charcoal-900/40'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="pt-2">
+                  {paymentMethod === 'card' && (
+                    <StripePayment
+                      amount={total}
+                      onSuccess={pid => createOrder(pid)}
+                      onError={msg => setError(msg)}
+                    />
+                  )}
+                  {paymentMethod === 'paypal' && (
+                    <PayPalButton
+                      amount={total}
+                      onSuccess={() => createOrder()}
+                      onError={msg => setError(msg)}
+                    />
+                  )}
+                  {paymentMethod === 'cash' && (
+                    <button
+                      onClick={() => createOrder()}
+                      disabled={isSubmitting}
+                      className="btn-primary w-full disabled:opacity-50"
+                    >
+                      {isSubmitting ? 'Wird übermittelt …' : 'Bestellung aufgeben (Bar bezahlen)'}
+                    </button>
+                  )}
+                </div>
+
+                {error && <p className="text-wine-600 text-sm">{error}</p>}
+              </section>
+            )}
+          </div>
+
+          {/* Order summary */}
+          <aside className="lg:sticky lg:top-24 h-fit bg-cream-50 border border-charcoal-900/10">
+            <div className="p-5 border-b border-charcoal-900/10">
+              <p className="eyebrow mb-1">Deine Bestellung</p>
+              <p className="text-xs text-charcoal-500">{state.items.length} Artikel</p>
+            </div>
+            <div className="p-5 space-y-2 max-h-96 overflow-y-auto">
               {state.items.map(i => (
-                <div key={`${i.menuItemId}__${i.size}`} className="flex justify-between text-gray-600">
-                  <span>{i.quantity}× {i.name}{i.size ? ` (${i.size})` : ''}</span>
-                  <span>{(i.price * i.quantity).toFixed(2)} €</span>
+                <div key={`${i.menuItemId}__${i.size}`} className="flex justify-between gap-2 text-sm">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-charcoal-900 truncate">
+                      <span className="text-gold-600">{i.quantity}×</span> {i.name}
+                    </p>
+                    {i.size && <p className="text-xs text-charcoal-500">{i.size}</p>}
+                  </div>
+                  <p className="font-serif text-charcoal-900 whitespace-nowrap">
+                    {(i.price * i.quantity).toFixed(2)} €
+                  </p>
                 </div>
               ))}
-              <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-200">
-                <span>Gesamt</span><span>{total.toFixed(2)} €</span>
+            </div>
+            <div className="p-5 border-t border-charcoal-900/10 bg-cream-100 space-y-2">
+              <div className="flex justify-between text-sm text-charcoal-600">
+                <span>Zwischensumme</span>
+                <span>{total.toFixed(2)} €</span>
+              </div>
+              <div className="flex justify-between text-sm text-charcoal-600">
+                <span>Liefergebühr</span>
+                <span className="text-gold-600">0,00 €</span>
+              </div>
+              <div className="flex justify-between font-serif text-xl text-charcoal-900 pt-3 border-t border-charcoal-900/10">
+                <span>Gesamt</span>
+                <span>{total.toFixed(2)} €</span>
               </div>
             </div>
-
-            <div className="flex gap-2 flex-wrap">
-              {(['card', 'paypal', 'cash'] as PaymentMethod[]).map(m => (
-                <button
-                  key={m}
-                  onClick={() => setPaymentMethod(m)}
-                  className={`px-4 py-2 rounded border text-sm font-medium transition-colors ${
-                    paymentMethod === m
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-primary'
-                  }`}
-                >
-                  {m === 'card' ? '💳 Karte / Klarna' : m === 'paypal' ? '🔵 PayPal' : '💵 Bar'}
-                </button>
-              ))}
-            </div>
-
-            {paymentMethod === 'card' && (
-              <StripePayment
-                amount={total}
-                onSuccess={pid => createOrder(pid)}
-                onError={msg => setError(msg)}
-              />
-            )}
-            {paymentMethod === 'paypal' && (
-              <PayPalButton
-                amount={total}
-                onSuccess={() => createOrder()}
-                onError={msg => setError(msg)}
-              />
-            )}
-            {paymentMethod === 'cash' && (
-              <button
-                onClick={() => createOrder()}
-                disabled={isSubmitting}
-                className="w-full bg-primary text-white font-bold py-3 rounded hover:bg-primary-dark transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? 'Wird übermittelt...' : 'Bestellung abschicken (Bar zahlen)'}
-              </button>
-            )}
-            {error && <p className="text-red-600 text-sm">{error}</p>}
-          </section>
-        )}
+          </aside>
+        </div>
       </main>
     </>
   )

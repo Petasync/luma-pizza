@@ -26,6 +26,7 @@ export interface MenuItem {
 export interface Order {
   id: string
   created_at: string
+  status_changed_at: string
   status: OrderStatus
   type: OrderType
   customer_name: string

@@ -12,22 +12,37 @@ export default function BestellenPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        <div className="bg-white border border-gray-200 rounded px-4 py-3 flex items-center gap-3 mb-5">
-          <span className="text-gray-400 text-sm">🔍</span>
-          <span className="text-gray-400 text-sm">Speisekarte durchsuchen...</span>
-        </div>
-
-        <div className="mb-6">
-          <CategoryTabs active={activeCategory} onChange={setActiveCategory} />
-        </div>
-
-        <div className="flex gap-6 items-start">
-          <div className="flex-1 min-w-0">
-            <MenuGrid category={activeCategory} />
+      <main className="pt-20 min-h-screen bg-cream-50">
+        {/* Header */}
+        <section className="bg-charcoal-900 text-cream-50 py-16 px-4 sm:px-6 lg:px-12">
+          <div className="container-wide text-center">
+            <p className="eyebrow text-gold-400 mb-4">Speisekarte</p>
+            <h1 className="heading-serif text-4xl md:text-5xl">
+              Unsere komplette Auswahl
+            </h1>
+            <p className="text-cream-100/70 mt-4 max-w-xl mx-auto">
+              Wähle aus über 60 hausgemachten Gerichten. Frisch zubereitet,
+              schnell geliefert oder zur Abholung bereit.
+            </p>
           </div>
-          <CartSidebar />
+        </section>
+
+        {/* Sticky category tabs */}
+        <div className="sticky top-20 z-40 bg-cream-50/95 backdrop-blur-md border-b border-charcoal-900/8">
+          <div className="container-wide px-4 sm:px-6 lg:px-12">
+            <CategoryTabs active={activeCategory} onChange={setActiveCategory} />
+          </div>
         </div>
+
+        {/* Content */}
+        <section className="container-wide px-4 sm:px-6 lg:px-12 py-12">
+          <div className="flex flex-col lg:flex-row gap-10 items-start">
+            <div className="flex-1 min-w-0">
+              <MenuGrid category={activeCategory} />
+            </div>
+            <CartSidebar />
+          </div>
+        </section>
       </main>
     </>
   )

@@ -5,17 +5,17 @@ import { OrderStatus } from '@/lib/types'
 const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Ausstehend',
   confirmed: 'Bestätigt',
-  preparing: 'In Zubereitung',
+  preparing: 'Zubereitung',
   ready: 'Fertig',
-  delivered: 'Geliefert/Abgeholt',
+  delivered: 'Abgeschlossen',
 }
 
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-blue-100 text-blue-800',
-  preparing: 'bg-orange-100 text-orange-800',
-  ready: 'bg-green-100 text-green-800',
-  delivered: 'bg-gray-100 text-gray-600',
+const STATUS_STYLES: Record<OrderStatus, string> = {
+  pending: 'bg-cream-200 text-charcoal-700',
+  confirmed: 'bg-charcoal-700 text-cream-50',
+  preparing: 'bg-gold-500 text-charcoal-900',
+  ready: 'bg-wine-600 text-cream-50',
+  delivered: 'bg-charcoal-900/15 text-charcoal-600',
 }
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
@@ -29,9 +29,10 @@ interface Props {
   orderId: string
   currentStatus: OrderStatus
   onUpdate: (s: OrderStatus) => void
+  compact?: boolean
 }
 
-export default function StatusButtons({ orderId, currentStatus, onUpdate }: Props) {
+export default function StatusButtons({ orderId, currentStatus, onUpdate, compact = false }: Props) {
   const [loading, setLoading] = useState(false)
   const next = NEXT_STATUS[currentStatus]
 
@@ -48,19 +49,21 @@ export default function StatusButtons({ orderId, currentStatus, onUpdate }: Prop
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className={`text-xs font-semibold px-2 py-1 rounded ${STATUS_COLORS[currentStatus]}`}>
+    <div className={`flex items-center gap-2 ${compact ? '' : 'flex-wrap'}`}>
+      <span className={`text-[10px] uppercase tracking-widest px-2.5 py-1 ${STATUS_STYLES[currentStatus]}`}>
         {STATUS_LABELS[currentStatus]}
       </span>
       {next && (
         <button
           onClick={advance}
           disabled={loading}
-          className="text-xs bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark disabled:opacity-50 transition-colors"
+          className="text-[10px] uppercase tracking-widest border border-charcoal-900 text-charcoal-900 px-2.5 py-1 hover:bg-charcoal-900 hover:text-cream-50 disabled:opacity-50 transition-colors"
         >
-          {loading ? '...' : `→ ${STATUS_LABELS[next]}`}
+          {loading ? '…' : `→ ${STATUS_LABELS[next]}`}
         </button>
       )}
     </div>
   )
 }
+
+export { STATUS_LABELS, STATUS_STYLES }

@@ -6,35 +6,23 @@ interface Props {
   onChange: (cat: string) => void
 }
 
-const CATEGORY_EMOJIS: Record<string, string> = {
-  'Pizza': '🍕',
-  'Burger': '🍔',
-  'Pasta': '🍝',
-  'Fisch Gerichte': '🐟',
-  'Schnitzel Gerichte': '🍖',
-  'Snacks': '🍗',
-  'Beilagen': '🍟',
-  'Salate': '🥗',
-  'Nachspeisen': '🍰',
-  'Alkoholische Getränke': '🍺',
-  'Alkoholfreie Getränke': '🥤',
-}
-
 export default function CategoryTabs({ active, onChange }: Props) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-1 overflow-x-auto scrollbar-hide border-b border-charcoal-900/10">
       {MENU_CATEGORIES.map(cat => (
         <button
           key={cat}
           onClick={() => onChange(cat)}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded text-sm font-medium transition-colors ${
+          className={`flex-shrink-0 px-5 py-4 text-xs uppercase tracking-widest font-medium transition-colors relative ${
             active === cat
-              ? 'bg-primary text-white'
-              : 'bg-white text-gray-600 border border-gray-200 hover:border-primary hover:text-primary'
+              ? 'text-charcoal-900'
+              : 'text-charcoal-500 hover:text-charcoal-900'
           }`}
         >
-          <span>{CATEGORY_EMOJIS[cat] ?? '•'}</span>
-          <span>{cat}</span>
+          {cat}
+          {active === cat && (
+            <span className="absolute bottom-0 left-3 right-3 h-px bg-gold-500" />
+          )}
         </button>
       ))}
     </div>

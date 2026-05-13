@@ -12,7 +12,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const supabase = createSupabaseServer()
   const { error } = await supabase
     .from('orders')
-    .update({ status })
+    .update({ status, status_changed_at: new Date().toISOString() })
     .eq('id', params.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
