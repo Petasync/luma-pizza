@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
-import { createSupabaseBrowser } from '@/lib/supabase-browser'
 import { Order, OrderStatus } from '@/lib/types'
 import StatsHeader from '@/components/admin/stats-header'
 import RevenueChart from '@/components/admin/revenue-chart'
@@ -18,37 +17,70 @@ const FILTER_LABELS: Record<Filter, string> = {
   delivered: 'Abgeschlossen',
 }
 
+const POLL_INTERVAL_MS = 10_000
+
+/** Short synthesized chime — no audio asset needed — when a new order arrives. */
+function playNewOrderChime() {
+  try {
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    const ctx = new Ctx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.type = 'sine'
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.25, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45)
+    osc.start()
+    osc.stop(ctx.currentTime + 0.45)
+    osc.onended = () => ctx.close()
+  } catch {
+    /* audio not available — silently ignore */
+  }
+}
+
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('aktiv')
 
   useEffect(() => {
-    const supabase = createSupabaseBrowser()
+    // Orders carry customer PII, so they're behind RLS — we poll the
+    // admin-only API route instead of reading Supabase from the browser.
+    let active = true
+    let knownIds: Set<string> | null = null
 
-    supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100)
-      .then(({ data }) => {
-        if (data) setOrders(data as Order[])
-        setLoading(false)
-      })
-
-    const channel = supabase
-      .channel('orders-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-        if (payload.eventType === 'INSERT') {
-          setOrders(prev => [payload.new as Order, ...prev])
-          try { new Audio('/notification.mp3').play() } catch {}
-        } else if (payload.eventType === 'UPDATE') {
-          setOrders(prev => prev.map(o => o.id === (payload.new as Order).id ? payload.new as Order : o))
+    async function load() {
+      try {
+        const res = await fetch('/api/admin/orders', { cache: 'no-store' })
+        if (!res.ok) {
+          if (active) setLoading(false)
+          return
         }
-      })
-      .subscribe()
+        const { orders: fetched } = (await res.json()) as { orders: Order[] }
+        if (!active) return
 
-    return () => { supabase.removeChannel(channel) }
+        // Chime when an order id appears that we hadn't seen before
+        // (skipped on the very first load so it doesn't fire on page open).
+        if (knownIds && fetched.some(o => !knownIds!.has(o.id))) {
+          playNewOrderChime()
+        }
+        knownIds = new Set(fetched.map(o => o.id))
+
+        setOrders(fetched)
+        setLoading(false)
+      } catch {
+        if (active) setLoading(false)
+      }
+    }
+
+    load()
+    const interval = setInterval(load, POLL_INTERVAL_MS)
+    return () => {
+      active = false
+      clearInterval(interval)
+    }
   }, [])
 
   const filteredOrders = useMemo(() => {
@@ -85,7 +117,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3 text-xs text-charcoal-500">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
-              Live verbunden
+              Aktualisiert automatisch
             </span>
           </div>
         </header>

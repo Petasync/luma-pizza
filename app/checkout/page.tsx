@@ -27,7 +27,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  async function createOrder(paymentIntentId?: string) {
+  async function createOrder(payment?: { stripeIntentId?: string; paypalOrderId?: string }) {
     setIsSubmitting(true)
     setError('')
     const res = await fetch('/api/orders', {
@@ -44,7 +44,8 @@ export default function CheckoutPage() {
         total_price: total,
         payment_method: paymentMethod,
         notes: contact.notes,
-        stripe_payment_intent_id: paymentIntentId,
+        stripe_payment_intent_id: payment?.stripeIntentId,
+        paypal_order_id: payment?.paypalOrderId,
       }),
     })
     const data = await res.json()
@@ -152,14 +153,14 @@ export default function CheckoutPage() {
                   {paymentMethod === 'card' && (
                     <StripePayment
                       amount={total}
-                      onSuccess={pid => createOrder(pid)}
+                      onSuccess={pid => createOrder({ stripeIntentId: pid })}
                       onError={msg => setError(msg)}
                     />
                   )}
                   {paymentMethod === 'paypal' && (
                     <PayPalButton
                       amount={total}
-                      onSuccess={() => createOrder()}
+                      onSuccess={orderId => createOrder({ paypalOrderId: orderId })}
                       onError={msg => setError(msg)}
                     />
                   )}

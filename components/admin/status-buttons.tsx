@@ -39,13 +39,16 @@ export default function StatusButtons({ orderId, currentStatus, onUpdate, compac
   async function advance() {
     if (!next) return
     setLoading(true)
-    await fetch(`/api/orders/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: next }),
-    })
-    onUpdate(next)
-    setLoading(false)
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      })
+      if (res.ok) onUpdate(next)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

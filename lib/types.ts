@@ -39,6 +39,7 @@ export interface Order {
   payment_method: PaymentMethod
   payment_status: PaymentStatus
   stripe_payment_intent_id?: string
+  paypal_order_id?: string
   notes?: string
 }
 
@@ -54,4 +55,5 @@ export interface CreateOrderPayload {
   payment_method: PaymentMethod
   notes?: string
   stripe_payment_intent_id?: string
+  paypal_order_id?: string
 }

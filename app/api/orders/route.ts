@@ -1,21 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { sendOrderConfirmationToCustomer, sendNewOrderToRestaurant } from '@/lib/resend'
-import { CreateOrderPayload, Order } from '@/lib/types'
+import { CreateOrderPayload, Order, PaymentStatus } from '@/lib/types'
+import { priceCart, PricingError } from '@/lib/pricing'
+import { stripe } from '@/lib/stripe'
+import { verifyPayPalOrder } from '@/lib/paypal'
+import { isDeliverable } from '@/lib/postal-codes'
 
 export async function POST(req: NextRequest) {
   const body: CreateOrderPayload = await req.json()
 
+  // --- basic field validation ---
   if (!body.customer_name || !body.customer_email || !body.customer_phone) {
     return NextResponse.json({ error: 'Kontaktdaten fehlen.' }, { status: 400 })
   }
-  if (!body.items || body.items.length === 0) {
-    return NextResponse.json({ error: 'Warenkorb ist leer.' }, { status: 400 })
-  }
-  if (body.type === 'delivery' && (!body.delivery_address || !body.postal_code)) {
-    return NextResponse.json({ error: 'Lieferadresse fehlt.' }, { status: 400 })
+  if (body.type === 'delivery') {
+    if (!body.delivery_address || !body.postal_code) {
+      return NextResponse.json({ error: 'Lieferadresse fehlt.' }, { status: 400 })
+    }
+    if (!isDeliverable(body.postal_code)) {
+      return NextResponse.json({ error: 'Wir liefern leider nicht an diese PLZ.' }, { status: 400 })
+    }
   }
 
+  // --- authoritative pricing: the browser is not trusted, recompute everything ---
+  let priced
+  try {
+    priced = priceCart(body.items)
+  } catch (e) {
+    const msg = e instanceof PricingError ? e.message : 'Warenkorb ungültig.'
+    return NextResponse.json({ error: msg }, { status: 400 })
+  }
+
+  // --- payment verification: never mark an order paid on the client's word ---
+  let paymentStatus: PaymentStatus
+  if (body.payment_method === 'cash') {
+    paymentStatus = 'pending'
+  } else if (body.payment_method === 'card') {
+    if (!body.stripe_payment_intent_id) {
+      return NextResponse.json({ error: 'Zahlung nicht bestätigt.' }, { status: 400 })
+    }
+    try {
+      const intent = await stripe.paymentIntents.retrieve(body.stripe_payment_intent_id)
+      if (
+        intent.status !== 'succeeded' ||
+        intent.currency !== 'eur' ||
+        intent.amount !== priced.totalCents
+      ) {
+        return NextResponse.json({ error: 'Zahlung konnte nicht verifiziert werden.' }, { status: 402 })
+      }
+    } catch {
+      return NextResponse.json({ error: 'Zahlung konnte nicht verifiziert werden.' }, { status: 402 })
+    }
+    paymentStatus = 'paid'
+  } else if (body.payment_method === 'paypal') {
+    let ok = false
+    try {
+      ok = await verifyPayPalOrder(body.paypal_order_id ?? '', priced.totalCents)
+    } catch {
+      ok = false
+    }
+    if (!ok) {
+      return NextResponse.json({ error: 'PayPal-Zahlung konnte nicht verifiziert werden.' }, { status: 402 })
+    }
+    paymentStatus = 'paid'
+  } else {
+    return NextResponse.json({ error: 'Ungültige Zahlungsart.' }, { status: 400 })
+  }
+
+  // --- persist (prices/items come from priceCart, not the request body) ---
   const supabase = createSupabaseServer()
   const { data, error } = await supabase
     .from('orders')
@@ -24,19 +77,24 @@ export async function POST(req: NextRequest) {
       customer_name: body.customer_name,
       customer_email: body.customer_email,
       customer_phone: body.customer_phone,
-      delivery_address: body.delivery_address ?? null,
-      postal_code: body.postal_code ?? null,
-      items: body.items,
-      total_price: body.total_price,
+      delivery_address: body.type === 'delivery' ? body.delivery_address : null,
+      postal_code: body.type === 'delivery' ? body.postal_code : null,
+      items: priced.items,
+      total_price: priced.total,
       payment_method: body.payment_method,
-      payment_status: body.payment_method === 'cash' ? 'pending' : 'paid',
+      payment_status: paymentStatus,
       stripe_payment_intent_id: body.stripe_payment_intent_id ?? null,
+      paypal_order_id: body.paypal_order_id ?? null,
       notes: body.notes ?? null,
     })
     .select()
     .single()
 
   if (error) {
+    // Unique-index violation on the payment id => the payment was already used.
+    if (error.code === '23505') {
+      return NextResponse.json({ error: 'Diese Zahlung wurde bereits verwendet.' }, { status: 409 })
+    }
     console.error('Supabase error:', error)
     return NextResponse.json({ error: 'Bestellung konnte nicht gespeichert werden.' }, { status: 500 })
   }

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ADMIN_COOKIE, verifySessionToken } from '@/lib/admin-auth'
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const isLoginPage = req.nextUrl.pathname === '/admin/login'
   if (req.nextUrl.pathname.startsWith('/admin') && !isLoginPage) {
-    const auth = req.cookies.get('admin_auth')?.value
-    if (auth !== process.env.ADMIN_PASSWORD) {
+    const token = req.cookies.get(ADMIN_COOKIE)?.value
+    const valid = await verifySessionToken(token)
+    if (!valid) {
       const url = req.nextUrl.clone()
       url.pathname = '/admin/login'
       return NextResponse.redirect(url)
