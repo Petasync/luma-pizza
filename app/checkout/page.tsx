@@ -8,6 +8,8 @@ import PostalCheck from '@/components/checkout/postal-check'
 import ContactForm, { ContactData } from '@/components/checkout/contact-form'
 import StripePayment from '@/components/checkout/stripe-payment'
 import PayPalButton from '@/components/checkout/paypal-button'
+import ClosedBanner from '@/components/closed-banner'
+import { useIsOpen } from '@/components/opening-status'
 import { OrderType, PaymentMethod } from '@/lib/types'
 import Link from 'next/link'
 
@@ -26,6 +28,10 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isOpen = useIsOpen()
+  // null = noch nicht festgestellt; behandeln wie "offen", damit der Button
+  // beim Server-Render nicht fälschlich deaktiviert wirkt.
+  const closed = isOpen === false
 
   async function createOrder(payment?: { stripeIntentId?: string; paypalOrderId?: string }) {
     setIsSubmitting(true)
@@ -84,6 +90,7 @@ export default function CheckoutPage() {
         <div className="container-narrow px-4 sm:px-6 lg:px-12 py-12 grid lg:grid-cols-3 gap-8">
           {/* Steps */}
           <div className="lg:col-span-2 space-y-6">
+            <ClosedBanner />
             {/* Step 1 */}
             <section className="bg-cream-50 border border-charcoal-900/10 p-8">
               <DeliveryToggle value={orderType} onChange={v => { setOrderType(v); setPlzConfirmed(false); setStep('delivery') }} />
@@ -150,28 +157,38 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="pt-2">
-                  {paymentMethod === 'card' && (
-                    <StripePayment
-                      amount={total}
-                      onSuccess={pid => createOrder({ stripeIntentId: pid })}
-                      onError={msg => setError(msg)}
-                    />
-                  )}
-                  {paymentMethod === 'paypal' && (
-                    <PayPalButton
-                      amount={total}
-                      onSuccess={orderId => createOrder({ paypalOrderId: orderId })}
-                      onError={msg => setError(msg)}
-                    />
-                  )}
-                  {paymentMethod === 'cash' && (
-                    <button
-                      onClick={() => createOrder()}
-                      disabled={isSubmitting}
-                      className="btn-primary w-full disabled:opacity-50"
-                    >
-                      {isSubmitting ? 'Wird übermittelt …' : 'Bestellung aufgeben (Bar bezahlen)'}
-                    </button>
+                  {closed ? (
+                    <div className="bg-charcoal-900/5 border border-charcoal-900/15 px-5 py-6 text-center">
+                      <p className="text-sm text-charcoal-700">
+                        Bestellungen sind aktuell außerhalb unserer Lieferzeiten nicht möglich.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {paymentMethod === 'card' && (
+                        <StripePayment
+                          amount={total}
+                          onSuccess={pid => createOrder({ stripeIntentId: pid })}
+                          onError={msg => setError(msg)}
+                        />
+                      )}
+                      {paymentMethod === 'paypal' && (
+                        <PayPalButton
+                          amount={total}
+                          onSuccess={orderId => createOrder({ paypalOrderId: orderId })}
+                          onError={msg => setError(msg)}
+                        />
+                      )}
+                      {paymentMethod === 'cash' && (
+                        <button
+                          onClick={() => createOrder()}
+                          disabled={isSubmitting}
+                          className="btn-primary w-full disabled:opacity-50"
+                        >
+                          {isSubmitting ? 'Wird übermittelt …' : 'Bestellung aufgeben (Bar bezahlen)'}
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
 

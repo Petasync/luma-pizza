@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCart } from '@/components/cart/cart-context'
+import OpeningStatusBadge from '@/components/opening-status'
 
 interface Props {
   /** When true, navbar starts transparent on top of a dark hero and turns solid on scroll. */
@@ -92,6 +93,7 @@ export default function Navbar({ transparent = false }: Props) {
               {l.label}
             </Link>
           ))}
+          <OpeningStatusBadge light={!solid} className="hidden lg:inline-flex" />
         </div>
 
         {/* CTA */}

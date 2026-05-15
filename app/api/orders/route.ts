@@ -6,9 +6,20 @@ import { priceCart, PricingError } from '@/lib/pricing'
 import { stripe } from '@/lib/stripe'
 import { verifyPayPalOrder } from '@/lib/paypal'
 import { isDeliverable } from '@/lib/postal-codes'
+import { isOpen, getOpeningStatus } from '@/lib/opening-hours'
 
 export async function POST(req: NextRequest) {
   const body: CreateOrderPayload = await req.json()
+
+  // --- Öffnungszeiten: außerhalb keine Bestellungen annehmen ---
+  if (!isOpen()) {
+    const status = getOpeningStatus()
+    const next = status.open ? '' : ` Wir öffnen ${status.nextOpenLabel} um ${status.nextOpenTime} Uhr.`
+    return NextResponse.json(
+      { error: `Wir nehmen aktuell keine Bestellungen entgegen.${next}` },
+      { status: 503 },
+    )
+  }
 
   // --- basic field validation ---
   if (!body.customer_name || !body.customer_email || !body.customer_phone) {

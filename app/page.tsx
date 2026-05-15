@@ -3,7 +3,9 @@ import Image from 'next/image'
 import Navbar from '@/components/navbar'
 import DeliveryMarquee from '@/components/delivery-marquee'
 import DeliveryBanner from '@/components/delivery-banner'
+import OpeningStatusBadge from '@/components/opening-status'
 import { HERO_IMAGE, STORY_IMAGE, KITCHEN_IMAGE, GALLERY_IMAGES, getCategoryImage } from '@/lib/images'
+import { getScheduleRows } from '@/lib/opening-hours'
 
 const FEATURED_CATEGORIES = [
   { name: 'Pizza', subtitle: 'Hausgemacht im Steinofen', items: 15 },
@@ -313,21 +315,21 @@ export default function HomePage() {
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-widest text-gold-600 mb-2">Öffnungszeiten</p>
+                <div className="flex items-center justify-between max-w-xs mb-3">
+                  <p className="text-xs uppercase tracking-widest text-gold-600">Lieferzeiten</p>
+                  <OpeningStatusBadge />
+                </div>
                 <ul className="text-charcoal-800 space-y-1">
-                  <li className="flex justify-between max-w-xs">
-                    <span>Montag – Donnerstag</span>
-                    <span>11:00 – 22:00</span>
-                  </li>
-                  <li className="flex justify-between max-w-xs">
-                    <span>Freitag – Samstag</span>
-                    <span>11:00 – 23:00</span>
-                  </li>
-                  <li className="flex justify-between max-w-xs">
-                    <span>Sonntag</span>
-                    <span>12:00 – 22:00</span>
-                  </li>
+                  {getScheduleRows().map(row => (
+                    <li key={row.day} className="flex justify-between max-w-xs">
+                      <span>{row.day}</span>
+                      <span className="tabular-nums">{row.hours}</span>
+                    </li>
+                  ))}
                 </ul>
+                <p className="text-xs text-gold-600 mt-3 max-w-xs">
+                  Lieferung in unser gesamtes Gebiet — <span className="font-medium">gratis</span>.
+                </p>
               </div>
 
               <div>

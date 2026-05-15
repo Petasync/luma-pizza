@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import OpeningStatusBadge from '@/components/opening-status'
+import { getScheduleRows } from '@/lib/opening-hours'
 
 export default function Footer() {
+  const rows = getScheduleRows()
   return (
     <footer className="bg-charcoal-900 text-cream-100 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-16">
@@ -16,10 +19,11 @@ export default function Footer() {
                 <p className="text-[10px] uppercase tracking-widest text-gold-400">Dietenhofen seit 2024</p>
               </div>
             </div>
-            <p className="text-sm text-cream-100/70 leading-relaxed max-w-md">
+            <p className="text-sm text-cream-100/70 leading-relaxed max-w-md mb-5">
               Frische Pizza aus dem Steinofen, hausgemachte Pasta und Burger nach
               Familienrezept. Direkt aus Dietenhofen — zum Abholen oder Liefern.
             </p>
+            <OpeningStatusBadge light />
           </div>
 
           {/* Kontakt */}
@@ -43,6 +47,26 @@ export default function Footer() {
               <li><Link href="/impressum" className="hover:text-gold-400">Impressum</Link></li>
               <li><Link href="/datenschutz" className="hover:text-gold-400">Datenschutz</Link></li>
             </ul>
+          </div>
+        </div>
+
+        {/* Lieferzeiten + Lieferkosten */}
+        <div className="mt-12 pt-8 border-t border-cream-100/10 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-gold-400 mb-4">Lieferzeiten</p>
+            <ul className="space-y-1 text-sm text-cream-100/80">
+              {rows.map(r => (
+                <li key={r.day} className="flex justify-between max-w-sm">
+                  <span>{r.day}</span>
+                  <span className="tabular-nums">{r.hours}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-widest text-gold-400 mb-4">Lieferkosten</p>
+            <p className="text-2xl font-serif text-gold-400">Gratis</p>
+            <p className="text-xs text-cream-100/60 mt-1">In unserem gesamten Liefergebiet.</p>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import DeliveryMarquee from '@/components/delivery-marquee'
 import CategoryTabs from '@/components/menu/category-tabs'
 import MenuGrid from '@/components/menu/menu-grid'
 import CartSidebar from '@/components/cart/cart-sidebar'
+import ClosedBanner from '@/components/closed-banner'
 import { MENU_CATEGORIES } from '@/lib/menu'
 
 export default function BestellenPage() {
@@ -39,6 +40,7 @@ export default function BestellenPage() {
 
         {/* Content */}
         <section className="container-wide px-4 sm:px-6 lg:px-12 py-12">
+          <ClosedBanner className="mb-6" />
           <div className="flex flex-col lg:flex-row gap-10 items-start">
             <div className="flex-1 min-w-0">
               <MenuGrid category={activeCategory} />
