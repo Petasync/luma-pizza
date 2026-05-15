@@ -14,6 +14,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Verhindert dass iOS bei Querformat-Drehung den Schriftgrad hochzieht. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -22,6 +25,20 @@ body {
   font-feature-settings: 'kern' 1, 'liga' 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Häufiger Mobile-Bug: irgendein Kind-Element überschreitet die Breite und
+     erzeugt horizontalen Scroll. Hart abriegeln. */
+  overflow-x: hidden;
+}
+
+/* Tap-Highlight (iOS) abschalten — der hellblaue Kasten sieht unschön aus. */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mindestschriftgröße 16 px bei Eingabefeldern verhindert das automatische
+   Heranzoomen, das iOS Safari bei Fokus auf <input> sonst macht. */
+input, textarea, select {
+  font-size: 16px;
 }
 
 /* Refined scroll bars */

@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useReducer, ReactNode, Dispatch } from 'react'
+import { createContext, useContext, useReducer, useEffect, useRef, ReactNode, Dispatch } from 'react'
 import { CartItem } from '@/lib/types'
 
 export interface CartState {
@@ -11,6 +11,9 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; menuItemId: string; size: string | null }
   | { type: 'DECREMENT_ITEM'; menuItemId: string; size: string | null }
   | { type: 'CLEAR' }
+  | { type: 'HYDRATE'; items: CartItem[] }
+
+const STORAGE_KEY = 'luma-cart-v1'
 
 function itemKey(menuItemId: string, size: string | null) {
   return `${menuItemId}__${size ?? 'nosize'}`
@@ -53,6 +56,8 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     }
     case 'CLEAR':
       return { items: [] }
+    case 'HYDRATE':
+      return { items: action.items }
   }
 }
 
@@ -67,6 +72,28 @@ const CartContext = createContext<CartContextValue | null>(null)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] })
+  // Initial-Render auf dem Server hat keine Items — wir hydrieren erst nach Mount,
+  // damit es keinen Hydration-Mismatch gibt.
+  const hydrated = useRef(false)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) {
+        const items = JSON.parse(raw) as CartItem[]
+        if (Array.isArray(items)) dispatch({ type: 'HYDRATE', items })
+      }
+    } catch { /* localStorage unavailable / corrupt — ignore */ }
+    hydrated.current = true
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated.current) return
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items))
+    } catch { /* quota / private mode — silently ignore */ }
+  }, [state.items])
+
   const total = state.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const itemCount = state.items.reduce((sum, i) => sum + i.quantity, 0)
   return (

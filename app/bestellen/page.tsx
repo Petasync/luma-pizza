@@ -44,8 +44,8 @@ export default function BestellenPage() {
           </div>
         </div>
 
-        {/* Content */}
-        <section className="container-wide px-4 sm:px-6 lg:px-12 py-12">
+        {/* Content — pb auf Mobile, damit Inhalt nicht hinter dem schwebenden Warenkorb-Button verschwindet */}
+        <section className="container-wide px-4 sm:px-6 lg:px-12 pt-8 pb-28 lg:pb-12">
           <ClosedBanner className="mb-6" />
           <div className="flex flex-col lg:flex-row gap-10 items-start">
             <div className="flex-1 min-w-0">

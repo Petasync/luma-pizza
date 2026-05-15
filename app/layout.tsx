@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { CartProvider } from '@/components/cart/cart-context'
+import MobileCart from '@/components/cart/mobile-cart'
 import Footer from '@/components/footer'
 
 const inter = Inter({
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <div className="flex-1">{children}</div>
           <Footer />
+          <MobileCart />
         </CartProvider>
         <Analytics />
         <SpeedInsights />

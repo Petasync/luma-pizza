@@ -7,7 +7,7 @@ export default function CartSidebar() {
   const { state, total, itemCount } = useCart()
 
   return (
-    <aside className="w-full lg:w-80 flex-shrink-0 bg-cream-50 border border-charcoal-900/10 lg:sticky lg:top-24 h-fit">
+    <aside className="hidden lg:block lg:w-80 flex-shrink-0 bg-cream-50 border border-charcoal-900/10 lg:sticky lg:top-24 h-fit">
       <div className="p-5 border-b border-charcoal-900/10 flex items-center justify-between">
         <h2 className="font-serif text-xl text-charcoal-900">Dein Warenkorb</h2>
         {itemCount > 0 && (

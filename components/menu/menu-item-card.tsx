@@ -94,17 +94,17 @@ export default function MenuItemCard({ item }: Props) {
           </p>
         )}
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
           {isPizza ? (
             <div className="flex gap-1 border border-charcoal-900/15">
               {(['26cm', '30cm'] as const).map(size => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`px-3 py-2 sm:py-1.5 text-xs font-medium transition-colors ${
                     selectedSize === size
                       ? 'bg-charcoal-900 text-cream-50'
-                      : 'text-charcoal-700 hover:bg-cream-100'
+                      : 'text-charcoal-700 hover:bg-cream-100 active:bg-cream-200'
                   }`}
                 >
                   {size}
@@ -120,16 +120,16 @@ export default function MenuItemCard({ item }: Props) {
           <button
             onClick={handleAdd}
             disabled={!item.available}
-            className={`inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-widest font-medium transition-all duration-300 ${
+            className={`inline-flex items-center gap-2 px-4 py-3 sm:py-2 text-xs uppercase tracking-widest font-medium transition-all duration-300 ${
               !item.available
                 ? 'bg-charcoal-200 text-charcoal-400 cursor-not-allowed'
                 : justAdded
                 ? 'bg-gold-500 text-charcoal-900'
-                : 'bg-charcoal-900 text-cream-50 hover:bg-gold-600'
+                : 'bg-charcoal-900 text-cream-50 hover:bg-gold-600 active:bg-gold-600'
             }`}
             aria-label={`${item.name} hinzufügen`}
           >
-            {justAdded ? 'Hinzugefügt' : '+ Hinzufügen'}
+            {justAdded ? '✓ Hinzugefügt' : '+ Hinzufügen'}
           </button>
         </div>
       </div>
