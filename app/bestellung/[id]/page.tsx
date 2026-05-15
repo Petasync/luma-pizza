@@ -4,6 +4,7 @@ import Navbar from '@/components/navbar'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { DELIVERY_ETA_MINUTES, PICKUP_ETA_MINUTES, formatEta } from '@/lib/business'
+import OrderStatusTracker from '@/components/order-status-tracker'
 
 export default async function OrderConfirmationPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServer()
@@ -39,7 +40,13 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
           </div>
         </section>
 
-        <div className="container-narrow px-4 sm:px-6 lg:px-12 py-12">
+        <div className="container-narrow px-4 sm:px-6 lg:px-12 py-12 space-y-6">
+          <OrderStatusTracker
+            orderId={order.id}
+            initialStatus={order.status}
+            initialChangedAt={order.status_changed_at ?? order.created_at}
+            orderType={order.type}
+          />
           <div className="bg-cream-50 border border-charcoal-900/10 p-8 md:p-12">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-charcoal-900/10 mb-6">
               <div>
