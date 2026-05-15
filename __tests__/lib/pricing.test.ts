@@ -1,14 +1,14 @@
 import { priceCart, PricingError } from '@/lib/pricing'
 import { CartItem } from '@/lib/types'
 
-// pizza-margherita: priceSmall 8.50 (26cm), priceLarge 9.50 (30cm)
+// pizza-margherita: priceSmall 8.50 (30 cm), priceLarge 9.50 (45 cm)
 // burger-cheese: price 11.00 (no size)
 // pizza-pastirma: available: false
 
 describe('priceCart', () => {
   it('computes the total from the canonical menu, ignoring client prices', () => {
     const items: CartItem[] = [
-      { menuItemId: 'pizza-margherita', name: 'whatever', size: '30cm', price: 0.01, quantity: 2 },
+      { menuItemId: 'pizza-margherita', name: 'whatever', size: '45cm', price: 0.01, quantity: 2 },
       { menuItemId: 'burger-cheese', name: 'x', size: null, price: 999, quantity: 1 },
     ]
     const result = priceCart(items)
@@ -19,9 +19,9 @@ describe('priceCart', () => {
     expect(result.items[1].price).toBe(11)
   })
 
-  it('uses priceSmall for the 26cm size', () => {
+  it('uses priceSmall for the 30 cm size', () => {
     const result = priceCart([
-      { menuItemId: 'pizza-margherita', name: 'x', size: '26cm', price: 0, quantity: 1 },
+      { menuItemId: 'pizza-margherita', name: 'x', size: '30cm', price: 0, quantity: 1 },
     ])
     expect(result.total).toBe(8.5)
   })
@@ -45,7 +45,7 @@ describe('priceCart', () => {
 
   it('rejects an unavailable item', () => {
     expect(() =>
-      priceCart([{ menuItemId: 'pizza-pastirma', name: 'x', size: '30cm', price: 0, quantity: 1 }]),
+      priceCart([{ menuItemId: 'pizza-pastirma', name: 'x', size: '45cm', price: 0, quantity: 1 }]),
     ).toThrow(PricingError)
   })
 

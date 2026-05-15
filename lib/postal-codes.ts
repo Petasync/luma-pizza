@@ -1,6 +1,7 @@
-// Liefergebiet rund um Dietenhofen 90599 — ca. 25 km Radius.
-// Sortiert grob nach Entfernung. Falls Orte ergänzt/entfernt werden müssen,
-// nur diese Datei anpassen; Marquee und PLZ-Check ziehen automatisch nach.
+// Liefergebiet rund um Dietenhofen 90599 — bis ca. 15–18 km (Luftlinie).
+// Distanzen via OpenStreetMap geprüft; sortiert grob nach Entfernung. Falls
+// Orte ergänzt/entfernt werden müssen, nur diese Datei anpassen — Marquee
+// und PLZ-Check ziehen automatisch nach.
 
 export interface DeliveryArea {
   postalCode: string
@@ -8,24 +9,20 @@ export interface DeliveryArea {
 }
 
 export const DELIVERY_AREAS: DeliveryArea[] = [
-  { postalCode: '90599', name: 'Dietenhofen' },
-  { postalCode: '91560', name: 'Heilsbronn' },
-  { postalCode: '91580', name: 'Petersaurach' },
-  { postalCode: '91590', name: 'Bruckberg' },
-  { postalCode: '91564', name: 'Neuendettelsau' },
-  { postalCode: '91586', name: 'Lichtenau' },
-  { postalCode: '91623', name: 'Sachsen b. Ansbach' },
-  { postalCode: '91611', name: 'Lehrberg' },
-  { postalCode: '91575', name: 'Windsbach' },
-  { postalCode: '91639', name: 'Wolframs-Eschenbach' },
-  { postalCode: '91459', name: 'Markt Erlbach' },
-  { postalCode: '90613', name: 'Großhabersdorf' },
-  { postalCode: '90574', name: 'Roßtal' },
-  { postalCode: '90556', name: 'Cadolzburg' },
-  { postalCode: '90614', name: 'Ammerndorf' },
-  { postalCode: '91522', name: 'Ansbach' },
-  { postalCode: '91550', name: 'Dinkelsbühl' },
-  { postalCode: '91541', name: 'Rothenburg o.d.T.' },
+  { postalCode: '90599', name: 'Dietenhofen' },          //  0,5 km
+  { postalCode: '91590', name: 'Bruckberg' },            //  5,2 km
+  { postalCode: '90613', name: 'Großhabersdorf' },       //  7,4 km
+  { postalCode: '91580', name: 'Petersaurach' },         //  8,9 km
+  { postalCode: '91560', name: 'Heilsbronn' },           //  9,8 km
+  { postalCode: '90614', name: 'Ammerndorf' },           // 12,2 km
+  { postalCode: '91459', name: 'Markt Erlbach' },        // 12,4 km
+  { postalCode: '91623', name: 'Sachsen b. Ansbach' },   // 12,6 km
+  { postalCode: '90556', name: 'Cadolzburg' },           // 13,5 km
+  { postalCode: '90574', name: 'Roßtal' },               // 14,3 km
+  { postalCode: '91611', name: 'Lehrberg' },             // 14,4 km
+  { postalCode: '91586', name: 'Lichtenau' },            // 14,7 km
+  { postalCode: '91522', name: 'Ansbach' },              // 14,8 km
+  { postalCode: '91564', name: 'Neuendettelsau' },       // 14,9 km
 ]
 
 const POSTAL_SET = new Set(DELIVERY_AREAS.map(a => a.postalCode))

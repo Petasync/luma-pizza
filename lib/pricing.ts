@@ -24,11 +24,11 @@ function priceForItem(menuItemId: string, size: string | null): number {
   if (!item) throw new PricingError(`Unbekannter Artikel: ${menuItemId}`)
   if (!item.available) throw new PricingError(`Artikel nicht verfügbar: ${item.name}`)
 
-  if (size === '26cm') {
+  if (size === '30cm') {
     if (item.priceSmall === undefined) throw new PricingError(`Größe ungültig für ${item.name}`)
     return item.priceSmall
   }
-  if (size === '30cm') {
+  if (size === '45cm') {
     if (item.priceLarge === undefined) throw new PricingError(`Größe ungültig für ${item.name}`)
     return item.priceLarge
   }
