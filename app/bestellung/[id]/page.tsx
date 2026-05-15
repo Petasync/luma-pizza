@@ -3,6 +3,7 @@ import { Order } from '@/lib/types'
 import Navbar from '@/components/navbar'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DELIVERY_ETA_MINUTES, PICKUP_ETA_MINUTES, formatEta } from '@/lib/business'
 
 export default async function OrderConfirmationPage({ params }: { params: { id: string } }) {
   const supabase = createSupabaseServer()
@@ -14,6 +15,8 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
 
   if (error || !data) notFound()
   const order = data as Order
+  const eta = formatEta(order.type === 'delivery' ? DELIVERY_ETA_MINUTES : PICKUP_ETA_MINUTES)
+  const etaLabel = order.type === 'delivery' ? 'Voraussichtliche Lieferzeit' : 'Voraussichtlich bereit in'
 
   return (
     <>
@@ -28,6 +31,11 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
             <p className="text-cream-100/75 max-w-md mx-auto">
               Deine Bestellung ist eingegangen — wir starten direkt mit der Zubereitung.
             </p>
+            <div className="mt-8 inline-flex items-center gap-3 px-5 py-3 border border-gold-400/40 bg-charcoal-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" aria-hidden="true" />
+              <span className="text-xs uppercase tracking-widest text-gold-400">{etaLabel}</span>
+              <span className="text-cream-50 font-medium tabular-nums">{eta}</span>
+            </div>
           </div>
         </section>
 

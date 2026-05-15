@@ -1,5 +1,7 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { CartProvider } from '@/components/cart/cart-context'
 import Footer from '@/components/footer'
@@ -35,6 +37,10 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: '#1A1612',
+}
+
 // LocalBusiness structured data — helps Luma Pizza appear in Google's local
 // results / maps. Phone and openingHours can be added here once confirmed.
 const restaurantJsonLd = {
@@ -65,6 +71,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex-1">{children}</div>
           <Footer />
         </CartProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

@@ -11,6 +11,12 @@ import PayPalButton from '@/components/checkout/paypal-button'
 import ClosedBanner from '@/components/closed-banner'
 import { useIsOpen } from '@/components/opening-status'
 import { OrderType, PaymentMethod } from '@/lib/types'
+import {
+  DELIVERY_ETA_MINUTES,
+  PICKUP_ETA_MINUTES,
+  MIN_ORDER_VALUE_DELIVERY,
+  formatEta,
+} from '@/lib/business'
 import Link from 'next/link'
 
 type Step = 'delivery' | 'contact' | 'payment'
@@ -32,6 +38,9 @@ export default function CheckoutPage() {
   // null = noch nicht festgestellt; behandeln wie "offen", damit der Button
   // beim Server-Render nicht fälschlich deaktiviert wirkt.
   const closed = isOpen === false
+  const belowMinOrder = orderType === 'delivery' && total < MIN_ORDER_VALUE_DELIVERY
+  const missingForDelivery = Math.max(0, MIN_ORDER_VALUE_DELIVERY - total)
+  const eta = formatEta(orderType === 'delivery' ? DELIVERY_ETA_MINUTES : PICKUP_ETA_MINUTES)
 
   async function createOrder(payment?: { stripeIntentId?: string; paypalOrderId?: string }) {
     setIsSubmitting(true)
@@ -115,10 +124,15 @@ export default function CheckoutPage() {
                       onClick={() => {
                         if (!contact.name || !contact.email || !contact.phone) { setError('Bitte alle Pflichtfelder ausfüllen.'); return }
                         if (orderType === 'delivery' && !contact.street) { setError('Bitte Straße angeben.'); return }
+                        if (belowMinOrder) {
+                          setError(`Mindestbestellwert für Lieferung: ${MIN_ORDER_VALUE_DELIVERY},00 €. Noch ${missingForDelivery.toFixed(2).replace('.', ',')} € fehlen.`)
+                          return
+                        }
                         setError('')
                         setStep('payment')
                       }}
-                      className="mt-6 btn-primary"
+                      disabled={belowMinOrder}
+                      className="mt-6 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Weiter zur Zahlung
                     </button>
@@ -202,6 +216,10 @@ export default function CheckoutPage() {
             <div className="p-5 border-b border-charcoal-900/10">
               <p className="eyebrow mb-1">Deine Bestellung</p>
               <p className="text-xs text-charcoal-500">{state.items.length} Artikel</p>
+              <p className="text-[11px] uppercase tracking-widest text-gold-600 mt-3">
+                {orderType === 'delivery' ? 'Lieferung in ca.' : 'Abholung in ca.'}{' '}
+                <span className="tabular-nums font-medium">{eta}</span>
+              </p>
             </div>
             <div className="p-5 space-y-2 max-h-96 overflow-y-auto">
               {state.items.map(i => (
@@ -227,6 +245,12 @@ export default function CheckoutPage() {
                 <span>Liefergebühr</span>
                 <span className="text-gold-600">0,00 €</span>
               </div>
+              {belowMinOrder && (
+                <div className="text-xs text-wine-600 pt-2 border-t border-wine-600/20">
+                  Mindestbestellwert für Lieferung {MIN_ORDER_VALUE_DELIVERY},00 € — noch{' '}
+                  <span className="font-medium">{missingForDelivery.toFixed(2).replace('.', ',')} €</span> fehlen.
+                </div>
+              )}
               <div className="flex justify-between font-serif text-xl text-charcoal-900 pt-3 border-t border-charcoal-900/10">
                 <span>Gesamt</span>
                 <span>{total.toFixed(2)} €</span>

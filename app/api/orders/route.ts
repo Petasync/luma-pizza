@@ -7,6 +7,7 @@ import { stripe } from '@/lib/stripe'
 import { verifyPayPalOrder } from '@/lib/paypal'
 import { isDeliverable } from '@/lib/postal-codes'
 import { isOpen, getOpeningStatus } from '@/lib/opening-hours'
+import { MIN_ORDER_VALUE_DELIVERY } from '@/lib/business'
 
 export async function POST(req: NextRequest) {
   const body: CreateOrderPayload = await req.json()
@@ -41,6 +42,14 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     const msg = e instanceof PricingError ? e.message : 'Warenkorb ungültig.'
     return NextResponse.json({ error: msg }, { status: 400 })
+  }
+
+  // --- Mindestbestellwert bei Lieferung ---
+  if (body.type === 'delivery' && priced.total < MIN_ORDER_VALUE_DELIVERY) {
+    return NextResponse.json(
+      { error: `Mindestbestellwert für Lieferung: ${MIN_ORDER_VALUE_DELIVERY},00 €.` },
+      { status: 400 },
+    )
   }
 
   // --- payment verification: never mark an order paid on the client's word ---

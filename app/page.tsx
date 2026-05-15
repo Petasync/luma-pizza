@@ -6,6 +6,7 @@ import DeliveryBanner from '@/components/delivery-banner'
 import OpeningStatusBadge from '@/components/opening-status'
 import { HERO_IMAGE, STORY_IMAGE, KITCHEN_IMAGE, GALLERY_IMAGES, getCategoryImage } from '@/lib/images'
 import { getScheduleRows } from '@/lib/opening-hours'
+import { DELIVERY_ETA_MINUTES, formatEta } from '@/lib/business'
 
 const FEATURED_CATEGORIES = [
   { name: 'Pizza', subtitle: 'Hausgemacht im Steinofen', items: 15 },
@@ -350,13 +351,36 @@ export default function HomePage() {
               </h3>
               <p className="text-cream-100/80 leading-relaxed mb-8">
                 Online bestellen, bezahlen und liefern lassen — oder zur Abholung
-                vorbeikommen. Dein Essen ist in ca. 30 Minuten bereit.
+                vorbeikommen. Dein Essen ist in ca. {formatEta(DELIVERY_ETA_MINUTES)} bereit.
               </p>
               <Link href="/bestellen" className="btn-gold w-full sm:w-auto">
                 Online bestellen
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Karte (OpenStreetMap-Embed, kein API-Key, kein Tracking) */}
+        <div className="container-wide mt-16 px-4 sm:px-6 lg:px-12">
+          <div className="aspect-[16/7] w-full border border-charcoal-900/10 bg-cream-50 overflow-hidden">
+            <iframe
+              title="Luma Pizza, Warzfeldener Straße 1-3, Dietenhofen"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=10.6837%2C49.3941%2C10.6937%2C49.4001&layer=mapnik&marker=49.3970650%2C10.6887029"
+              loading="lazy"
+              className="w-full h-full"
+              style={{ border: 0 }}
+            />
+          </div>
+          <p className="text-xs text-charcoal-500 mt-3 text-center">
+            <a
+              href="https://www.openstreetmap.org/?mlat=49.3970650&mlon=10.6887029#map=18/49.3970650/10.6887029"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold-600"
+            >
+              In größerer Karte ansehen ↗
+            </a>
+          </p>
         </div>
       </section>
     </>
