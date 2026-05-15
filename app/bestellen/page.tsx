@@ -6,13 +6,19 @@ import CategoryTabs from '@/components/menu/category-tabs'
 import MenuGrid from '@/components/menu/menu-grid'
 import CartSidebar from '@/components/cart/cart-sidebar'
 import ClosedBanner from '@/components/closed-banner'
-import { MENU_CATEGORIES } from '@/lib/menu'
+import { MENU_CATEGORIES, menuJsonLd } from '@/lib/menu'
+
+const MENU_JSON_LD = JSON.stringify(menuJsonLd())
 
 export default function BestellenPage() {
   const [activeCategory, setActiveCategory] = useState<string>(MENU_CATEGORIES[0])
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: MENU_JSON_LD }}
+      />
       <Navbar />
       <main className="pt-20 min-h-screen bg-cream-50">
         <DeliveryMarquee />

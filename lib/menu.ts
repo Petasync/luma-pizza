@@ -100,3 +100,36 @@ export function getItemsByCategory(category: string): MenuItem[] {
 export function getItemById(id: string): MenuItem | undefined {
   return MENU_ITEMS.find(item => item.id === id)
 }
+
+/**
+ * Schema.org Menu Structured Data — füttert Google für "Speisekarten-Karten"
+ * in der lokalen Suche/Maps. Nur verfügbare Artikel; Preise in EUR.
+ */
+export function menuJsonLd() {
+  const sections = MENU_CATEGORIES.map(cat => {
+    const items = MENU_ITEMS.filter(i => i.category === cat && i.available).map(item => {
+      const offers = item.priceSmall !== undefined && item.priceLarge !== undefined
+        ? [
+            { '@type': 'Offer', name: '26 cm', price: item.priceSmall!.toFixed(2), priceCurrency: 'EUR' },
+            { '@type': 'Offer', name: '30 cm', price: item.priceLarge!.toFixed(2), priceCurrency: 'EUR' },
+          ]
+        : item.price !== undefined
+          ? { '@type': 'Offer', price: item.price.toFixed(2), priceCurrency: 'EUR' }
+          : undefined
+      return {
+        '@type': 'MenuItem',
+        name: item.name,
+        ...(item.description ? { description: item.description } : {}),
+        ...(offers ? { offers } : {}),
+      }
+    })
+    return { '@type': 'MenuSection', name: cat, hasMenuItem: items }
+  }).filter(s => Array.isArray(s.hasMenuItem) && s.hasMenuItem.length > 0)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Menu',
+    name: 'Speisekarte — Luma Pizza',
+    hasMenuSection: sections,
+  }
+}
