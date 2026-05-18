@@ -7,3 +7,9 @@ node_modules
 coverage
 .vercel
 *.tsbuildinfo
+
+# local design-source scratch space (logo PDFs, helper scripts, work folder)
+_logo-work/
+_logo-source.pdf
+_*.py
+zeminsiz*.pdf

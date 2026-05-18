@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import OpeningStatusBadge from '@/components/opening-status'
 import { getScheduleRows } from '@/lib/opening-hours'
 
@@ -10,10 +11,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 border border-gold-500 text-gold-500 flex items-center justify-center font-serif">
-                L
-              </div>
+            <div className="flex items-center gap-4 mb-5">
+              <Image
+                src="/logo.png"
+                alt="Luma Pizza"
+                width={900}
+                height={722}
+                className="h-16 w-auto"
+              />
               <div>
                 <p className="font-serif text-xl">Luma Pizza</p>
                 <p className="text-[10px] uppercase tracking-widest text-gold-400">Dietenhofen seit 2024</p>

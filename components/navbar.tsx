@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCart } from '@/components/cart/cart-context'
@@ -53,14 +54,15 @@ export default function Navbar({ transparent = false }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div
-            className={`w-9 h-9 border flex items-center justify-center transition-colors ${
-              solid ? 'border-gold-500 text-gold-600' : 'border-cream-50 text-cream-50'
-            }`}
-          >
-            <span className="font-serif text-base">L</span>
-          </div>
-          <div className="flex flex-col leading-none">
+          <Image
+            src="/logo.png"
+            alt="Luma Pizza"
+            width={900}
+            height={722}
+            priority
+            className="h-12 w-auto sm:h-14"
+          />
+          <div className="hidden sm:flex flex-col leading-none">
             <span
               className={`font-serif text-lg tracking-wide transition-colors ${
                 solid ? 'text-charcoal-900' : 'text-cream-50'
