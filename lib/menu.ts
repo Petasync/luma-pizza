@@ -110,8 +110,8 @@ export function menuJsonLd() {
     const items = MENU_ITEMS.filter(i => i.category === cat && i.available).map(item => {
       const offers = item.priceSmall !== undefined && item.priceLarge !== undefined
         ? [
-            { '@type': 'Offer', name: '26 cm', price: item.priceSmall!.toFixed(2), priceCurrency: 'EUR' },
-            { '@type': 'Offer', name: '30 cm', price: item.priceLarge!.toFixed(2), priceCurrency: 'EUR' },
+            { '@type': 'Offer', name: '30 cm', price: item.priceSmall!.toFixed(2), priceCurrency: 'EUR' },
+            { '@type': 'Offer', name: '45 cm', price: item.priceLarge!.toFixed(2), priceCurrency: 'EUR' },
           ]
         : item.price !== undefined
           ? { '@type': 'Offer', price: item.price.toFixed(2), priceCurrency: 'EUR' }

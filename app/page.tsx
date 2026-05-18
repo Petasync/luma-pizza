@@ -16,18 +16,21 @@ const FEATURED_CATEGORIES = [
 
 const REVIEWS = [
   {
-    text: 'Die beste Pizza, die ich seit langem gegessen habe. Der Teig ist perfekt — knusprig am Rand und luftig in der Mitte.',
-    author: 'Sarah M.',
+    text: 'Super leckeres Essen und preislich top, wir kommen auf jeden Fall wieder.',
+    author: 'Christine Winkler',
+    source: 'Google · vor 3 Monaten',
     rating: 5,
   },
   {
-    text: 'Schnelle Lieferung, alles noch heiß. Die Pasta Carbonara ist ein Traum. Wir bestellen jetzt regelmäßig.',
-    author: 'Thomas K.',
+    text: 'Meine Pizza Speziale war spitzenmäßig. War bestimmt nicht meine letzte hier… Perfekt!',
+    author: 'Evi Fuchs',
+    source: 'Google · vor 2 Monaten',
     rating: 5,
   },
   {
-    text: 'Sehr freundlicher Service und herausragende Qualität. Hat sich gelohnt, Luma kennenzulernen.',
-    author: 'Anna B.',
+    text: 'Super lecker essen — Essen, Service und Ambiente alles 5 von 5. Reservierung empfohlen.',
+    author: 'Engin Üstün',
+    source: 'Google · vor 2 Monaten',
     rating: 5,
   },
 ] as const
@@ -86,15 +89,15 @@ export default function HomePage() {
       <section className="bg-charcoal-900 text-cream-100 py-6 border-t border-gold-700/30">
         <div className="container-wide grid grid-cols-2 md:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-12 text-center">
           <div>
-            <p className="font-serif text-2xl text-gold-400">4,7</p>
-            <p className="text-[11px] uppercase tracking-widest mt-1 text-cream-100/70">Sterne ★</p>
+            <p className="font-serif text-2xl text-gold-400">5,0 ★</p>
+            <p className="text-[11px] uppercase tracking-widest mt-1 text-cream-100/70">Google-Bewertungen</p>
           </div>
           <div>
             <p className="font-serif text-2xl text-gold-400">0 €</p>
             <p className="text-[11px] uppercase tracking-widest mt-1 text-cream-100/70">Liefergebühr</p>
           </div>
           <div>
-            <p className="font-serif text-2xl text-gold-400">~30 min</p>
+            <p className="font-serif text-2xl text-gold-400">{formatEta(DELIVERY_ETA_MINUTES)}</p>
             <p className="text-[11px] uppercase tracking-widest mt-1 text-cream-100/70">Lieferzeit</p>
           </div>
           <div>
@@ -249,7 +252,7 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <p className="eyebrow mb-4">Was Gäste sagen</p>
             <h2 className="heading-serif text-4xl md:text-5xl text-cream-50">
-              4,7 von 5 Sternen.
+              Echte Stimmen aus Dietenhofen.
             </h2>
           </div>
 
@@ -262,9 +265,12 @@ export default function HomePage() {
                 <p className="text-cream-100/85 leading-relaxed mb-6 italic">
                   &laquo;{r.text}&raquo;
                 </p>
-                <p className="text-xs uppercase tracking-widest text-gold-400">
-                  — {r.author}
-                </p>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gold-400">
+                    — {r.author}
+                  </p>
+                  <p className="text-[11px] text-cream-100/50 mt-1">{r.source}</p>
+                </div>
               </div>
             ))}
           </div>

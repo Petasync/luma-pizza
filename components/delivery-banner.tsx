@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { DELIVERY_AREAS } from '@/lib/postal-codes'
+import { DELIVERY_ETA_MINUTES, formatEta } from '@/lib/business'
 
 export default function DeliveryBanner() {
   return (
@@ -15,7 +16,7 @@ export default function DeliveryBanner() {
           </h2>
           <p className="text-cream-100/80 leading-relaxed mb-8 max-w-lg">
             Du musst nicht mehr selbst kommen — wir bringen dir Pizza, Burger und
-            Pasta direkt nach Hause. Im gesamten Umkreis von <strong className="text-gold-400">25&nbsp;km</strong> um
+            Pasta direkt nach Hause. Im gesamten Umkreis von <strong className="text-gold-400">bis&nbsp;zu&nbsp;15&nbsp;km</strong> um
             Dietenhofen, ohne Liefergebühr.
           </p>
 
@@ -30,7 +31,7 @@ export default function DeliveryBanner() {
 
           <div className="grid grid-cols-3 gap-4 pt-6 border-t border-cream-100/15">
             <div>
-              <p className="font-serif text-3xl text-gold-400">~30 min</p>
+              <p className="font-serif text-3xl text-gold-400">{formatEta(DELIVERY_ETA_MINUTES)}</p>
               <p className="text-[10px] uppercase tracking-widest mt-1 text-cream-100/60">Lieferzeit</p>
             </div>
             <div>
