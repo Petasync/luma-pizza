@@ -159,13 +159,14 @@ Bei Fragen: info@luma-pizza.de
 Luma Pizza · Dietenhofen
 www.luma-pizza.de`
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: FROM_CUSTOMER,
     to: order.customer_email,
     subject,
     text,
     html: shellHtml({ preheader, bodyHtml }),
   })
+  if (error) throw new Error(`Resend customer mail failed: ${JSON.stringify(error)}`)
 }
 
 // -----------------------------------------------------------------------------
@@ -275,11 +276,12 @@ Zahlungsart: ${paymentLabel(order.payment_method)}
 Admin-Dashboard: ${SITE_URL}/admin
 Bestell-ID: ${order.id}`
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: FROM_RESTAURANT,
     to,
     subject,
     text,
     html: shellHtml({ preheader, bodyHtml }),
   })
+  if (error) throw new Error(`Resend restaurant mail failed: ${JSON.stringify(error)}`)
 }
