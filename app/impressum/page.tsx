@@ -31,7 +31,7 @@ export default function ImpressumPage() {
           <section>
             <p className="eyebrow mb-3">Kontakt</p>
             <p className="text-charcoal-700">
-              Telefon: <span className="font-medium">(noch eintragen)</span><br />
+              Telefon: <a href="tel:+4915124882899" className="font-medium text-gold-600 hover:underline">0151 24882899</a><br />
               E-Mail: <a href="mailto:info@luma-pizza.de" className="text-gold-600 hover:underline">info@luma-pizza.de</a>
             </p>
           </section>

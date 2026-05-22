@@ -43,7 +43,7 @@ export const viewport: Viewport = {
 }
 
 // LocalBusiness structured data — helps Luma Pizza appear in Google's local
-// results / maps. Phone and openingHours can be added here once confirmed.
+// results / maps. openingHours can be added here once confirmed.
 const restaurantJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Restaurant',
@@ -58,6 +58,7 @@ const restaurantJsonLd = {
   },
   url: 'https://luma-pizza.de',
   email: 'info@luma-pizza.de',
+  telephone: '+4915124882899',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

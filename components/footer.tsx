@@ -37,7 +37,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-cream-100/80">
               <li>Warzfeldener Straße 1-3</li>
               <li>90599 Dietenhofen</li>
-              <li className="pt-2">Tel: <a href="tel:+49000000000" className="hover:text-gold-400">(noch eintragen)</a></li>
+              <li className="pt-2">Tel: <a href="tel:+4915124882899" className="hover:text-gold-400">0151 24882899</a></li>
               <li><a href="mailto:info@luma-pizza.de" className="hover:text-gold-400">info@luma-pizza.de</a></li>
             </ul>
           </div>
