@@ -15,6 +15,8 @@ export const MENU_CATEGORIES = [
 ] as const
 
 export const MENU_ITEMS: MenuItem[] = [
+  // --- TEMPORÄRER STRIPE-LIVE-TEST (vor Go-Live wieder entfernen!) ---
+  { id: 'zzz-stripe-test', category: 'Snacks', name: 'TEST-Artikel – bitte NICHT bestellen', description: 'Interner Stripe-Test, wird wieder entfernt', price: 1.00, available: true },
   // --- PIZZA ---
   { id: 'pizza-margherita', category: 'Pizza', name: 'Pizza Margherita', description: 'Tomatensauce, Edamer, Käse', priceSmall: 8.50, priceLarge: 9.50, available: true, tags: ['vegetarisch'] },
   { id: 'pizza-mozzarella', category: 'Pizza', name: 'Pizza Mozzarella', description: 'Tomatensauce, Mozzarella, Käse', priceSmall: 8.50, priceLarge: 9.50, available: true },

@@ -8,7 +8,7 @@ export const DELIVERY_ETA_MINUTES = { min: 30, max: 45 } as const
 export const PICKUP_ETA_MINUTES = { min: 20, max: 30 } as const
 
 /** Mindestbestellwert für Lieferung in Euro. Pickup hat keinen. */
-export const MIN_ORDER_VALUE_DELIVERY = 15
+export const MIN_ORDER_VALUE_DELIVERY = 1
 
 /** Liefergebühr in Euro. Aktuell gratis im gesamten Liefergebiet. */
 export const DELIVERY_FEE = 0
