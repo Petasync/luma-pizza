@@ -35,52 +35,30 @@ Stand: 15.05.2026. Aktualisiert sich, sobald Punkte abgehakt sind.
 
 ---
 
-## 🔴 Pflicht vor Go-Live
+## ✅ Pflicht vor Go-Live — erledigt
 
-### 1. Echte Telefonnummer eintragen
-
-Im Footer, Impressum und Homepage-Kontaktbereich steht noch
-`(noch eintragen)`. Im Impressum gesetzlich vorgeschrieben.
-**Sag mir die Nummer und ich trage sie überall ein.**
-
-### 2. Admin-Passwort ändern
-
-`ADMIN_PASSWORD` steht auf `changeme123`. Bitte vor Go-Live in Vercel
-(Settings → Environment Variables → Production) auf etwas Sicheres ändern.
-
-### 3. Domain `luma-pizza.de` verbinden
-
-In Vercel → Projekt → Settings → Domains → `luma-pizza.de` hinzufügen
-und die angezeigten DNS-Einträge bei netcup setzen. Danach
-`NEXT_PUBLIC_BASE_URL` in Vercel auf `https://luma-pizza.de` ändern.
-
-### 4. GitHub-Token widerrufen
-
-Du hattest mal einen Personal Access Token im Chat gepostet. Falls noch
-nicht geschehen: https://github.com/settings/tokens widerrufen.
+1. **Telefonnummer** (0151 24882899) in Footer, Impressum, Homepage-Kontakt
+   und LocalBusiness-Structured-Data eingetragen.
+2. **Admin-Passwort** in Vercel (Production) auf einen sicheren Wert geändert.
+3. **Domain** `www.luma-pizza.de` ist die Hauptvariante — alle absoluten URLs
+   (Metadaten, Sitemap, robots.txt, E-Mail-Logo) zeigen darauf.
+4. **GitHub-Token** widerrufen.
 
 ---
 
-## 🟠 Sobald nutzbar (kein Pflicht-Stop, aber wichtig für vollen Betrieb)
+## ✅ Voller Betrieb — erledigt
 
 ### Resend-Mail (Bestellbestätigungen)
+Domain `luma-pizza.de` verifiziert, `RESEND_API_KEY` in Vercel gesetzt.
+Absender: `bestellungen@luma-pizza.de`. Bestätigungsmails gehen raus.
 
-Aktuell Platzhalter-Key → keine Mails. Schritte:
-1. Account bei https://resend.com mit luma-pizza.de-Adresse
-2. Domain `luma-pizza.de` verifizieren (DNS bei netcup)
-3. `RESEND_API_KEY` in Vercel eintragen
-4. AVV mit Resend abschließen (Auftragsverarbeitungsvertrag)
-5. Sag Bescheid → ich stelle `from:` von `onboarding@resend.dev` auf
-   `bestellungen@luma-pizza.de` um.
+### PayPal
+Live mit Production-Keys (`NEXT_PUBLIC_PAYPAL_CLIENT_ID` +
+`PAYPAL_CLIENT_SECRET`, `PAYPAL_MODE=live`). Zahlung getestet — funktioniert.
 
-### PayPal-Account
+---
 
-Aktuell `xxxx…`-Platzhalter. Server lehnt PayPal-Zahlungen sauber ab,
-solange so. Schritte:
-1. Business-Account bei https://paypal.com mit luma-pizza.de-Adresse
-2. App erstellen → Client ID + Secret
-3. `NEXT_PUBLIC_PAYPAL_CLIENT_ID` + `PAYPAL_CLIENT_SECRET` in Vercel eintragen
-4. Optional `PAYPAL_MODE=live` (Default ist Sandbox)
+## 🟠 Offen
 
 ### AVVs (Auftragsverarbeitungsverträge) abschließen
 

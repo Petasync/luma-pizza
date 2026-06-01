@@ -39,6 +39,7 @@ export default function OrderStatusTracker({ orderId, initialStatus, initialChan
     // Wenn die Bestellung schon abgeschlossen ist, lohnt sich kein Polling.
     if (initialStatus === 'delivered') return
     let active = true
+    let id: ReturnType<typeof setInterval>
 
     async function load() {
       try {
@@ -48,12 +49,14 @@ export default function OrderStatusTracker({ orderId, initialStatus, initialChan
         if (!active) return
         setStatus(data.status)
         setChangedAt(data.status_changed_at)
+        // Endzustand erreicht — weiteres Pollen bringt nichts mehr.
+        if (data.status === 'delivered') clearInterval(id)
       } catch {
         /* network glitch — nächster Tick versucht es neu */
       }
     }
 
-    const id = setInterval(load, POLL_MS)
+    id = setInterval(load, POLL_MS)
     return () => { active = false; clearInterval(id) }
   }, [orderId, initialStatus])
 

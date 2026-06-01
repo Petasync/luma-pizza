@@ -22,7 +22,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://luma-pizza.de'),
+  metadataBase: new URL('https://www.luma-pizza.de'),
   title: 'Luma Pizza — Authentisch italienisch, frisch zubereitet',
   description: 'Luma Pizza in Dietenhofen. Hausgemachte Pizza, Burger, Pasta und mehr. Direkt online bestellen, abholen oder liefern lassen.',
   keywords: ['Pizza Dietenhofen', 'Pizza bestellen', 'Pizza Lieferservice', 'Pizzeria Dietenhofen', 'Luma Pizza', 'Pizza liefern lassen'],
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     siteName: 'Luma Pizza',
     title: 'Luma Pizza — Authentisch italienisch, frisch zubereitet',
     description: 'Hausgemachte Pizza, Burger und Pasta aus Dietenhofen. Jetzt online bestellen — zum Abholen oder Liefern.',
-    url: 'https://luma-pizza.de',
+    url: 'https://www.luma-pizza.de',
   },
 }
 
@@ -56,7 +56,7 @@ const restaurantJsonLd = {
     addressLocality: 'Dietenhofen',
     addressCountry: 'DE',
   },
-  url: 'https://luma-pizza.de',
+  url: 'https://www.luma-pizza.de',
   email: 'info@luma-pizza.de',
   telephone: '+4915124882899',
 }

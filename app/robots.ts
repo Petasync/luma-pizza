@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin', '/checkout', '/bestellung/', '/api/'],
     },
-    sitemap: 'https://luma-pizza.de/sitemap.xml',
+    sitemap: 'https://www.luma-pizza.de/sitemap.xml',
   }
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = 'https://luma-pizza.de'
+const BASE_URL = 'https://www.luma-pizza.de'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
