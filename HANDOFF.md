@@ -44,19 +44,30 @@ Das Projekt ist eine **Demo** für den Kunden (Inhaber Kadir Kizisar). Wenn der 
 - Multi-Step Checkout (Lieferung→Kontakt→Zahlung) mit Stripe (gefixt), PayPal-Sandbox, Bar
 - Bestätigungs-Seite, Impressum, Datenschutz, Footer
 - Admin-Dashboard mit Stats-Header, Tagesumsatz-Chart, Priority-Badges, Zeit-im-Status, Filter
-- 18 Lieferorte im 25-km-Umkreis Dietenhofen (`lib/postal-codes.ts`)
+- 11 Lieferorte im Umkreis Dietenhofen (`lib/postal-codes.ts`)
 - Delivery-Marquee + Delivery-Banner Komponenten
 - 10/10 Tests grün, `npm run build` erfolgreich
 
-### ⚠️ Bekannte offene Punkte
+### 🟢 Live-Status (Stand 2026-06-01)
 
-1. **Mail-Versand kommt teils nicht an** — Resend mit `onboarding@resend.dev` als Absender liefert **nur an die Mail des Resend-Account-Inhabers**. Sobald Kunde verifizierte Domain hat → `from:` in `lib/resend.ts` ändern.
-2. **PayPal-Sandbox nicht konfiguriert** — Component existiert, aber `NEXT_PUBLIC_PAYPAL_CLIENT_ID` in `.env.local` ist Platzhalter. Auf Anfrage des Users zurückgestellt.
-3. **Telefon-Nr. im Footer/Impressum/Datenschutz** — Platzhalter "(noch eintragen)". Echte Nummer vom Kunden einholen.
+Die Seite ist **live und produktionsreif** unter `https://www.luma-pizza.de`
+(www = Hauptvariante). `main` deployt automatisch über Vercel.
+
+- ✅ Telefonnummer (0151 24882899) überall eingetragen (Footer, Impressum, Homepage, JSON-LD)
+- ✅ Admin-Passwort in Vercel (Production) auf sicheren Wert gesetzt
+- ✅ Resend-Domain verifiziert, Absender `bestellungen@luma-pizza.de` — Mails gehen raus
+- ✅ PayPal **live** mit Production-Keys, Zahlung getestet
+- ✅ GitHub-Token widerrufen
+- ✅ Server-seitige Preise + Zahlungsverifikation (Stripe/PayPal) + Replay-Schutz
+- ✅ Öffnungszeiten zentral (`lib/opening-hours.ts`), Bestellungen außerhalb serverseitig gesperrt
+- ✅ SEO (sitemap/robots/JSON-LD/OG), PWA-Manifest, Live-Bestelltracker, 25/25 Tests grün
+
+### ⚠️ Noch offen
+
+1. **DSGVO-AVVs** mit Vercel/Supabase/Resend abschließen (organisatorisch, kein Code) — siehe `GO-LIVE.md`.
+2. **Lieferorte** — aktuell 11 PLZ in `lib/postal-codes.ts`; bei Bedarf mit Kunden final abstimmen.
+3. **Echte Produktfotos** statt Unsplash (`lib/images.ts`) — optional.
 4. **Notification-Sound im Admin** — Code referenziert `/notification.mp3`, Datei fehlt. Aktuell try/catch — Admin funktioniert auch ohne Sound.
-5. **Stripe Webhook-Route** (`/api/stripe/webhook`) — Plan referenziert, noch nicht implementiert. Für die Demo nicht nötig (Order wird nach erfolgreichem `confirmPayment` direkt erstellt).
-6. **Lieferorte Fakten-Check** — Die 18 PLZs sind plausible Nachbarorte, aber nicht final mit dem Kunden abgestimmt. Liste in `lib/postal-codes.ts` editieren falls nötig.
-7. **Kein Deploy** — Lokal läuft alles, Vercel-Deploy steht noch aus (siehe `SETUP.md` Schritt 7).
 
 ---
 
@@ -222,12 +233,16 @@ Reihenfolge wie du sie angehen würdest, wenn nichts Neues vom User kommt:
 
 ---
 
-## 12. Letzter Stand der Konversation
+## 12. Letzter Stand der Konversation (2026-06-01)
 
-Der User hatte zwei Wünsche, beide umgesetzt:
-- ✅ Stripe-Checkout-Bug gefixt (useEffect-Endlosschleife wegen instabiler `onError`-Dep → mit `useRef` stabilisiert, `clientSecret` mutiert nicht mehr)
-- ✅ Liefergebiet hervorgehoben: Marquee mit allen 18 Orten + große "Jetzt auch lieferbar"-Sektion auf der Homepage, plus Marquee oben auf /bestellen
+Seite ist live. In dieser Session umgesetzt und nach `main` gepusht (deployt):
+- ✅ **Speisekarte-Scroll:** Klick auf eine Rubrik scrollt an den Menü-Anfang, statt am Seitenende zu klemmen, wenn eine kürzere Rubrik das Dokument schrumpft (`app/bestellen/page.tsx`, Anker mit `scroll-mt-20`)
+- ✅ **Rubrik-Tabs:** brechen auf Desktop um (`md:flex-wrap`), auf Mobile Fade-Hinweis rechts + aktiver Tab wird in den sichtbaren Bereich zentriert (`components/menu/category-tabs.tsx`)
+- ✅ **„Hinzufügen"-Button:** bricht bei schmalen Karten sauber um statt vom `overflow-hidden` der Karte abgeschnitten zu werden (`components/menu/menu-item-card.tsx`)
+- ✅ **Liefergebiet:** Ansbach, Neuendettelsau, Heilsbronn entfernt (jetzt 11 Orte, `lib/postal-codes.ts`)
+- ✅ **www-Vereinheitlichung:** alle absoluten URLs auf `https://www.luma-pizza.de` (Metadaten, OG, JSON-LD, Sitemap, robots.txt) — konsistent mit den E-Mail-Links
+- ✅ **Live-Tracker:** stoppt das 8s-Polling, sobald `delivered` erreicht ist (`components/order-status-tracker.tsx`)
 
-Danach: Bitte um Push in neues GitHub-Repo + dieses HANDOFF.md zu schreiben.
+Review-Fazit: keine echten Bugs, Sicherheits-/SEO-/PWA-Architektur sauber. Einziger offener Punkt: DSGVO-AVVs (siehe `GO-LIVE.md`).
 
-Wenn du übernimmst und der User dich anschreibt: er will direkt weitermachen, nicht erstmal alles re-evaluieren. Du kannst sofort agieren — Tasks anlegen, fixen, bauen. Bei größeren Designentscheidungen kurz Rücksprache.
+Wenn du übernimmst: User will direkt weitermachen, nicht erstmal alles re-evaluieren. Sofort agieren — fixen, bauen. **Push auf `main` = Live-Deploy**, daher vorher kurz bestätigen lassen. Bei größeren Designentscheidungen Rücksprache.
