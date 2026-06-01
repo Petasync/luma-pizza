@@ -94,9 +94,9 @@ export default function MenuItemCard({ item }: Props) {
           </p>
         )}
 
-        <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-3 flex-wrap">
           {isPizza ? (
-            <div className="flex gap-1 border border-charcoal-900/15">
+            <div className="flex gap-1 border border-charcoal-900/15 flex-shrink-0">
               {(['30cm', '45cm'] as const).map(size => (
                 <button
                   key={size}
@@ -120,7 +120,7 @@ export default function MenuItemCard({ item }: Props) {
           <button
             onClick={handleAdd}
             disabled={!item.available}
-            className={`inline-flex items-center gap-2 px-4 py-3 sm:py-2 text-xs uppercase tracking-widest font-medium transition-all duration-300 ${
+            className={`flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-xs uppercase tracking-widest font-medium whitespace-nowrap transition-all duration-300 ${
               !item.available
                 ? 'bg-charcoal-200 text-charcoal-400 cursor-not-allowed'
                 : justAdded

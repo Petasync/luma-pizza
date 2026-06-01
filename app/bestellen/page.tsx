@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Navbar from '@/components/navbar'
 import DeliveryMarquee from '@/components/delivery-marquee'
 import CategoryTabs from '@/components/menu/category-tabs'
@@ -12,6 +12,15 @@ const MENU_JSON_LD = JSON.stringify(menuJsonLd())
 
 export default function BestellenPage() {
   const [activeCategory, setActiveCategory] = useState<string>(MENU_CATEGORIES[0])
+  const menuTopRef = useRef<HTMLDivElement>(null)
+
+  function handleCategoryChange(cat: string) {
+    setActiveCategory(cat)
+    // Kürzere Rubriken lassen das Dokument schrumpfen — sonst klemmt der Browser
+    // die Scroll-Position ans neue (kleinere) Maximum und man landet am
+    // Seitenende. Daher beim Wechsel an den Menü-Anfang scrollen.
+    menuTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
     <>
@@ -37,10 +46,13 @@ export default function BestellenPage() {
           </div>
         </section>
 
+        {/* Scroll-Anker: scroll-mt-20 = Höhe der fixen Navbar (80px) */}
+        <div ref={menuTopRef} className="scroll-mt-20" aria-hidden />
+
         {/* Sticky category tabs */}
         <div className="sticky top-20 z-40 bg-cream-50/95 backdrop-blur-md border-b border-charcoal-900/8">
           <div className="container-wide px-4 sm:px-6 lg:px-12">
-            <CategoryTabs active={activeCategory} onChange={setActiveCategory} />
+            <CategoryTabs active={activeCategory} onChange={handleCategoryChange} />
           </div>
         </div>
 
