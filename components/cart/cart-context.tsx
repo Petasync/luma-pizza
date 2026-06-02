@@ -13,8 +13,8 @@ type CartAction =
   | { type: 'CLEAR' }
   | { type: 'HYDRATE'; items: CartItem[] }
 
-// v2: Pizza-Größen-Schema 30/45 cm (vorher 26/30) — alter Cart wird verworfen.
-const STORAGE_KEY = 'luma-cart-v2'
+// v3: Pizza-Größen-Schema 32/45 cm (vorher 30/45) — alter Cart wird verworfen.
+const STORAGE_KEY = 'luma-cart-v3'
 
 function itemKey(menuItemId: string, size: string | null) {
   return `${menuItemId}__${size ?? 'nosize'}`

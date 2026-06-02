@@ -14,7 +14,7 @@ import { OrderType, PaymentMethod } from '@/lib/types'
 import {
   DELIVERY_ETA_MINUTES,
   PICKUP_ETA_MINUTES,
-  MIN_ORDER_VALUE_DELIVERY,
+  getMinOrderForPostalCode,
   formatEta,
 } from '@/lib/business'
 import Link from 'next/link'
@@ -38,8 +38,10 @@ export default function CheckoutPage() {
   // null = noch nicht festgestellt; behandeln wie "offen", damit der Button
   // beim Server-Render nicht fälschlich deaktiviert wirkt.
   const closed = isOpen === false
-  const belowMinOrder = orderType === 'delivery' && total < MIN_ORDER_VALUE_DELIVERY
-  const missingForDelivery = Math.max(0, MIN_ORDER_VALUE_DELIVERY - total)
+  // Ortsabhängiger Mindestbestellwert: greift erst, wenn die PLZ feststeht.
+  const minOrder = orderType === 'delivery' ? getMinOrderForPostalCode(postalCode) : 0
+  const belowMinOrder = orderType === 'delivery' && plzConfirmed && total < minOrder
+  const missingForDelivery = Math.max(0, minOrder - total)
   const eta = formatEta(orderType === 'delivery' ? DELIVERY_ETA_MINUTES : PICKUP_ETA_MINUTES)
 
   async function createOrder(payment?: { stripeIntentId?: string; paypalOrderId?: string }) {
@@ -125,7 +127,7 @@ export default function CheckoutPage() {
                         if (!contact.name || !contact.email || !contact.phone) { setError('Bitte alle Pflichtfelder ausfüllen.'); return }
                         if (orderType === 'delivery' && !contact.street) { setError('Bitte Straße angeben.'); return }
                         if (belowMinOrder) {
-                          setError(`Mindestbestellwert für Lieferung: ${MIN_ORDER_VALUE_DELIVERY},00 €. Noch ${missingForDelivery.toFixed(2).replace('.', ',')} € fehlen.`)
+                          setError(`Mindestbestellwert für Lieferung: ${minOrder},00 €. Noch ${missingForDelivery.toFixed(2).replace('.', ',')} € fehlen.`)
                           return
                         }
                         setError('')
@@ -247,7 +249,7 @@ export default function CheckoutPage() {
               </div>
               {belowMinOrder && (
                 <div className="text-xs text-wine-600 pt-2 border-t border-wine-600/20">
-                  Mindestbestellwert für Lieferung {MIN_ORDER_VALUE_DELIVERY},00 € — noch{' '}
+                  Mindestbestellwert für Lieferung {minOrder},00 € — noch{' '}
                   <span className="font-medium">{missingForDelivery.toFixed(2).replace('.', ',')} €</span> fehlen.
                 </div>
               )}

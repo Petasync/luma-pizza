@@ -17,61 +17,60 @@ function berlinWallClock(year: number, month: number, day: number, hour: number,
   return new Date(Date.UTC(year, month - 1, day, hour - 2, minute))
 }
 
+// Einheitlicher Plan: täglich 15:00–24:00 (siehe lib/opening-hours.ts SCHEDULE).
 describe('opening-hours', () => {
-  // Mo 2026-05-18, Monday open is 17:00–23:15
-  it('is open on Monday at 18:00', () => {
+  it('is open on Monday at 18:00 — closes at 24:00', () => {
     const d = berlinWallClock(2026, 5, 18, 18, 0)
     expect(isOpen(d)).toBe(true)
     const s = getOpeningStatus(d)
     expect(s.open).toBe(true)
-    if (s.open) expect(s.closesAt).toBe('23:15')
+    if (s.open) expect(s.closesAt).toBe('24:00')
   })
 
-  it('is closed on Monday at 16:59 — next opening is today 17:00', () => {
-    const d = berlinWallClock(2026, 5, 18, 16, 59)
+  it('is open at 15:00 sharp', () => {
+    const d = berlinWallClock(2026, 5, 18, 15, 0)
+    expect(isOpen(d)).toBe(true)
+  })
+
+  it('is open at 23:59 (just before midnight)', () => {
+    const d = berlinWallClock(2026, 5, 18, 23, 59)
+    expect(isOpen(d)).toBe(true)
+  })
+
+  it('is closed at 14:59 — next opening is today 15:00', () => {
+    const d = berlinWallClock(2026, 5, 18, 14, 59)
     expect(isOpen(d)).toBe(false)
     const s = getOpeningStatus(d)
     expect(s.open).toBe(false)
     if (!s.open) {
       expect(s.nextOpenLabel).toBe('Heute')
-      expect(s.nextOpenTime).toBe('17:00')
+      expect(s.nextOpenTime).toBe('15:00')
     }
   })
 
-  it('is closed on Monday at 23:15 sharp', () => {
-    const d = berlinWallClock(2026, 5, 18, 23, 15)
+  it('is closed at 00:30 after midnight — next opening is today 15:00', () => {
+    const d = berlinWallClock(2026, 5, 18, 0, 30)
     expect(isOpen(d)).toBe(false)
-  })
-
-  it('is closed on Monday at 23:30 — next opening is tomorrow 17:30 (Tuesday)', () => {
-    const d = berlinWallClock(2026, 5, 18, 23, 30)
     const s = getOpeningStatus(d)
     expect(s.open).toBe(false)
     if (!s.open) {
-      expect(s.nextOpenLabel).toBe('Morgen')
-      expect(s.nextOpenTime).toBe('17:30')
+      expect(s.nextOpenLabel).toBe('Heute')
+      expect(s.nextOpenTime).toBe('15:00')
     }
   })
 
-  it('uses the special Thursday 15:00 opening', () => {
-    // Thursday 2026-05-21 at 15:00
-    const d = berlinWallClock(2026, 5, 21, 15, 0)
+  it('is open on Sunday at 15:30', () => {
+    const d = berlinWallClock(2026, 5, 24, 15, 30)
     expect(isOpen(d)).toBe(true)
   })
 
-  it('uses the special Sunday 14:00 opening', () => {
-    // Sunday 2026-05-24 at 14:30
-    const d = berlinWallClock(2026, 5, 24, 14, 30)
-    expect(isOpen(d)).toBe(true)
-  })
-
-  it('schedule rows are Mon→Sun in order', () => {
+  it('schedule rows are Mon→Sun in order, all 15:00 – 24:00', () => {
     const rows = getScheduleRows()
     expect(rows.map(r => r.day)).toEqual([
       'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag',
     ])
-    expect(rows[0].hours).toBe('17:00 – 23:15')
-    expect(rows[3].hours).toBe('15:00 – 23:15')
-    expect(rows[6].hours).toBe('14:00 – 23:15')
+    for (const row of rows) {
+      expect(row.hours).toBe('15:00 – 24:00')
+    }
   })
 })

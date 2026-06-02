@@ -11,11 +11,11 @@ interface Props {
 
 export default function MenuItemCard({ item }: Props) {
   const { dispatch } = useCart()
-  const [selectedSize, setSelectedSize] = useState<'30cm' | '45cm'>('45cm')
+  const [selectedSize, setSelectedSize] = useState<'32cm' | '45cm'>('45cm')
   const [justAdded, setJustAdded] = useState(false)
   const isPizza = item.priceSmall !== undefined && item.priceLarge !== undefined
   const price = isPizza
-    ? (selectedSize === '30cm' ? item.priceSmall! : item.priceLarge!)
+    ? (selectedSize === '32cm' ? item.priceSmall! : item.priceLarge!)
     : item.price!
 
   function handleAdd() {
@@ -97,7 +97,7 @@ export default function MenuItemCard({ item }: Props) {
         <div className="flex items-center gap-3 flex-wrap">
           {isPizza ? (
             <div className="flex gap-1 border border-charcoal-900/15 flex-shrink-0">
-              {(['30cm', '45cm'] as const).map(size => (
+              {(['32cm', '45cm'] as const).map(size => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}

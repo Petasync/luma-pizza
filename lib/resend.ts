@@ -174,8 +174,13 @@ www.luma-pizza.de`
 // -----------------------------------------------------------------------------
 
 export async function sendNewOrderToRestaurant(order: Order) {
-  const to = process.env.RESTAURANT_EMAIL
-  if (!to) return
+  // RESTAURANT_EMAIL darf mehrere Empfänger enthalten (kommagetrennt),
+  // z. B. das Bestell-Postfach + Kadirs private Adresse.
+  const to = (process.env.RESTAURANT_EMAIL ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+  if (to.length === 0) return
 
   const shortId = orderShortId(order)
   const total = formatEuro(order.total_price)

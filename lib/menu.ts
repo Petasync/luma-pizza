@@ -30,8 +30,8 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'pizza-gam', category: 'Pizza', name: 'Pizza Gam', description: 'Tomatensauce, Shrimps, Knoblauch, Käse', priceSmall: 9.50, priceLarge: 11.00, available: true },
   { id: 'pizza-meeresfruchte', category: 'Pizza', name: 'Pizza Meeresfrüchte', description: 'Tomatensauce, Meeresfrüchte, Knoblauch, Käse', priceSmall: 9.50, priceLarge: 11.00, available: true },
   { id: 'pizza-botanik', category: 'Pizza', name: 'Pizza Botanik', description: 'Tomatensauce, Cherrytomaten, Mais, Käse', priceSmall: 8.50, priceLarge: 10.00, available: true, tags: ['vegetarisch'] },
-  { id: 'pizza-calzone', category: 'Pizza', name: 'Pizza Calzone 30 cm', description: 'Tomatensauce, Schinken, Salami, Champignons', price: 10.00, available: true },
-  { id: 'pizza-pastirma', category: 'Pizza', name: 'Pizza Pastirma', description: 'Tomatensauce, Kalbschinken, Rucola, Käse', priceSmall: 9.50, priceLarge: 11.00, available: false },
+  { id: 'pizza-calzone', category: 'Pizza', name: 'Pizza Calzone 32 cm', description: 'Tomatensauce, Schinken, Salami, Champignons', price: 10.00, available: true },
+  { id: 'pizza-pastirma', category: 'Pizza', name: 'Pizza Pastirma', description: 'Tomatensauce, Kalbschinken, Rucola, Käse', priceSmall: 9.50, priceLarge: 11.00, available: true },
   // --- BURGER ---
   { id: 'burger-classic', category: 'Burger', name: 'Classic Burger', description: 'Rinderfleisch, Salat, Tomaten, Gewürzgurke, Zwiebeln', price: 10.00, available: true },
   { id: 'burger-cheese', category: 'Burger', name: 'Cheese Burger', description: 'Rinderfleisch, Salat, Tomaten, Gewürzgurke, Käse', price: 11.00, available: true },
@@ -65,7 +65,6 @@ export const MENU_ITEMS: MenuItem[] = [
   // --- NACHSPEISEN ---
   { id: 'dessert-baklava', category: 'Nachspeisen', name: 'Baklava', description: '', price: 6.00, available: true },
   { id: 'dessert-tiramisu', category: 'Nachspeisen', name: 'Tiramisu', description: '', price: 6.50, available: true },
-  { id: 'dessert-milchreis', category: 'Nachspeisen', name: 'Milchreis', description: '', price: 5.00, available: false },
   { id: 'dessert-ice', category: 'Nachspeisen', name: 'Ice Kugel', description: '', price: 2.00, available: false },
   // --- ALKOHOLISCHE GETRÄNKE ---
   { id: 'drink-rotwein', category: 'Alkoholische Getränke', name: 'Rotwein Flasche', description: '', price: 11.00, available: true, tags: ['18+'] },
@@ -82,10 +81,6 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'drink-fanta-l', category: 'Alkoholfreie Getränke', name: 'Fanta 1,0l', description: '', price: 5.00, available: true },
   { id: 'drink-sprite-l', category: 'Alkoholfreie Getränke', name: 'Sprite 1,0l', description: '', price: 5.00, available: true },
   { id: 'drink-mezzo-l', category: 'Alkoholfreie Getränke', name: 'Mezzo Mix 1,0l', description: '', price: 5.00, available: true },
-  { id: 'drink-cola-s', category: 'Alkoholfreie Getränke', name: 'Coca-Cola 0,33l', description: '', price: 3.00, available: true },
-  { id: 'drink-fanta-s', category: 'Alkoholfreie Getränke', name: 'Fanta 0,33l', description: '', price: 3.00, available: true },
-  { id: 'drink-sprite-s', category: 'Alkoholfreie Getränke', name: 'Sprite 0,33l', description: '', price: 3.00, available: true },
-  { id: 'drink-mezzo-s', category: 'Alkoholfreie Getränke', name: 'Mezzo Mix 0,33l', description: '', price: 3.00, available: true },
   { id: 'drink-arizona', category: 'Alkoholfreie Getränke', name: 'Arizona', description: '', price: 3.50, available: true },
   { id: 'drink-redbull', category: 'Alkoholfreie Getränke', name: 'Red Bull 0,25l', description: '', price: 2.50, available: true },
   { id: 'drink-wasser', category: 'Alkoholfreie Getränke', name: 'Mineralwasser', description: '', price: 2.50, available: true },
@@ -110,7 +105,7 @@ export function menuJsonLd() {
     const items = MENU_ITEMS.filter(i => i.category === cat && i.available).map(item => {
       const offers = item.priceSmall !== undefined && item.priceLarge !== undefined
         ? [
-            { '@type': 'Offer', name: '30 cm', price: item.priceSmall!.toFixed(2), priceCurrency: 'EUR' },
+            { '@type': 'Offer', name: '32 cm', price: item.priceSmall!.toFixed(2), priceCurrency: 'EUR' },
             { '@type': 'Offer', name: '45 cm', price: item.priceLarge!.toFixed(2), priceCurrency: 'EUR' },
           ]
         : item.price !== undefined

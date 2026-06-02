@@ -12,13 +12,13 @@ export interface DaySchedule {
 
 // Wochentage nach JS-Konvention: 0 = Sonntag, 1 = Montag, …, 6 = Samstag.
 export const SCHEDULE: Record<number, DaySchedule | null> = {
-  1: { open: '17:00', close: '23:15' }, // Montag
-  2: { open: '17:30', close: '23:15' }, // Dienstag
-  3: { open: '18:00', close: '23:15' }, // Mittwoch
-  4: { open: '15:00', close: '23:15' }, // Donnerstag
-  5: { open: '17:00', close: '23:15' }, // Freitag
-  6: { open: '17:00', close: '23:15' }, // Samstag
-  0: { open: '14:00', close: '23:15' }, // Sonntag
+  1: { open: '15:00', close: '24:00' }, // Montag
+  2: { open: '15:00', close: '24:00' }, // Dienstag
+  3: { open: '15:00', close: '24:00' }, // Mittwoch
+  4: { open: '15:00', close: '24:00' }, // Donnerstag
+  5: { open: '15:00', close: '24:00' }, // Freitag
+  6: { open: '15:00', close: '24:00' }, // Samstag
+  0: { open: '15:00', close: '24:00' }, // Sonntag
 }
 
 const DAY_LABELS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']

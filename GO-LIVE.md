@@ -91,7 +91,7 @@ Jeder Anbieter hat einen Self-Service-AVV in den Account-Einstellungen.
 |---|---|
 | Lieferzeiten | `lib/opening-hours.ts` |
 | Lieferzeit-Schätzung | `lib/business.ts` → `DELIVERY_ETA_MINUTES` |
-| Mindestbestellwert | `lib/business.ts` → `MIN_ORDER_VALUE_DELIVERY` |
+| Mindestbestellwert (ortsabh.) | `lib/business.ts` → `getMinOrderForPostalCode` / `MIN_ORDER_DIETENHOFEN` · `MIN_ORDER_OTHER` |
 | Liefergebühr | `lib/business.ts` → `DELIVERY_FEE` (0 = gratis) |
 | Liefergebiet (PLZ) | `lib/postal-codes.ts` |
 | Speisekarte | `lib/menu.ts` |

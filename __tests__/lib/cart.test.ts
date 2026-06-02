@@ -21,7 +21,7 @@ describe('cartReducer', () => {
   })
 
   it('treats same item with different size as separate', () => {
-    const item1Small = { ...item1, size: '30cm', price: 8.50 }
+    const item1Small = { ...item1, size: '32cm', price: 8.50 }
     const state1 = cartReducer(emptyState, { type: 'ADD_ITEM', item: item1 })
     const state2 = cartReducer(state1, { type: 'ADD_ITEM', item: item1Small })
     expect(state2.items).toHaveLength(2)

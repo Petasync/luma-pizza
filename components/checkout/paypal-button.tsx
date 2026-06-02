@@ -10,7 +10,7 @@ interface Props {
 export default function PayPalButton({ amount, onSuccess, onError }: Props) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'
   return (
-    <PayPalScriptProvider options={{ clientId, currency: 'EUR' }}>
+    <PayPalScriptProvider options={{ clientId, currency: 'EUR', disableFunding: 'sepa' }}>
       <PayPalButtons
         style={{ layout: 'vertical', shape: 'rect' }}
         createOrder={(_, actions) =>
