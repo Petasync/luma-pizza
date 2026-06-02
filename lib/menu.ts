@@ -64,7 +64,6 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'salat-mexico', category: 'Salate', name: 'Mexico Salat', description: 'Hähnchenbrust, Rucola, Cherrytomaten, Gurken, Röstzwiebeln', price: 9.50, available: true },
   // --- NACHSPEISEN ---
   { id: 'dessert-baklava', category: 'Nachspeisen', name: 'Baklava', description: '', price: 6.00, available: true },
-  { id: 'dessert-tiramisu', category: 'Nachspeisen', name: 'Tiramisu', description: '', price: 6.50, available: true },
   { id: 'dessert-ice', category: 'Nachspeisen', name: 'Ice Kugel', description: '', price: 2.00, available: false },
   // --- ALKOHOLISCHE GETRÄNKE ---
   { id: 'drink-rotwein', category: 'Alkoholische Getränke', name: 'Rotwein Flasche', description: '', price: 11.00, available: true, tags: ['18+'] },
@@ -77,7 +76,6 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'drink-zindorfer', category: 'Alkoholische Getränke', name: 'Zindorfer 0,5l', description: '', price: 4.00, available: true, tags: ['18+'] },
   { id: 'drink-radler', category: 'Alkoholische Getränke', name: 'Radler', description: '', price: 3.50, available: true, tags: ['18+'] },
   // --- ALKOHOLFREIE GETRÄNKE ---
-  { id: 'drink-cola-l', category: 'Alkoholfreie Getränke', name: 'Coca-Cola 1,0l', description: '', price: 5.00, available: true },
   { id: 'drink-fanta-l', category: 'Alkoholfreie Getränke', name: 'Fanta 1,0l', description: '', price: 5.00, available: true },
   { id: 'drink-sprite-l', category: 'Alkoholfreie Getränke', name: 'Sprite 1,0l', description: '', price: 5.00, available: true },
   { id: 'drink-mezzo-l', category: 'Alkoholfreie Getränke', name: 'Mezzo Mix 1,0l', description: '', price: 5.00, available: true },
