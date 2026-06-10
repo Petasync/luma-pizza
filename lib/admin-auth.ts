@@ -63,4 +63,16 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   return timingSafeEqual(sig, expected)
 }
 
+/**
+ * Verifies the device login token used by the restaurant terminal (kiosk laptop).
+ * It is a separate bearer secret from ADMIN_PASSWORD so it can be rotated on its
+ * own — e.g. if the laptop is lost — without forcing every staff member to learn
+ * a new password. Compared in constant time to avoid leaking it via timing.
+ */
+export function verifyDeviceToken(key: string | undefined | null): boolean {
+  const expected = process.env.DASHBOARD_DEVICE_TOKEN
+  if (!expected || !key) return false
+  return timingSafeEqual(key, expected)
+}
+
 export const ADMIN_COOKIE_MAX_AGE = MAX_AGE_SECONDS
