@@ -4,6 +4,7 @@ import { Order, OrderStatus } from '@/lib/types'
 import StatsHeader from '@/components/admin/stats-header'
 import RevenueChart from '@/components/admin/revenue-chart'
 import OrderCard from '@/components/admin/order-card'
+import { useOrderAlarm } from '@/components/admin/use-order-alarm'
 
 type Filter = 'aktiv' | 'alle' | OrderStatus
 
@@ -19,27 +20,6 @@ const FILTER_LABELS: Record<Filter, string> = {
 
 const POLL_INTERVAL_MS = 10_000
 
-/** Short synthesized chime — no audio asset needed — when a new order arrives. */
-function playNewOrderChime() {
-  try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    const ctx = new Ctx()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.type = 'sine'
-    osc.frequency.value = 880
-    gain.gain.setValueAtTime(0.25, ctx.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45)
-    osc.start()
-    osc.stop(ctx.currentTime + 0.45)
-    osc.onended = () => ctx.close()
-  } catch {
-    /* audio not available — silently ignore */
-  }
-}
-
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -49,7 +29,6 @@ export default function AdminDashboard() {
     // Orders carry customer PII, so they're behind RLS — we poll the
     // admin-only API route instead of reading Supabase from the browser.
     let active = true
-    let knownIds: Set<string> | null = null
 
     async function load() {
       try {
@@ -60,13 +39,6 @@ export default function AdminDashboard() {
         }
         const { orders: fetched } = (await res.json()) as { orders: Order[] }
         if (!active) return
-
-        // Chime when an order id appears that we hadn't seen before
-        // (skipped on the very first load so it doesn't fire on page open).
-        if (knownIds && fetched.some(o => !knownIds!.has(o.id))) {
-          playNewOrderChime()
-        }
-        knownIds = new Set(fetched.map(o => o.id))
 
         setOrders(fetched)
         setLoading(false)
@@ -97,6 +69,9 @@ export default function AdminDashboard() {
     ready: orders.filter(o => o.status === 'ready').length,
   }), [orders])
 
+  // Audible alarm for the terminal — rings while orders await confirmation.
+  const alarm = useOrderAlarm(counts.pending)
+
   if (loading) {
     return (
       <main className="min-h-screen p-8 bg-cream-100">
@@ -108,6 +83,19 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-cream-100 p-4 sm:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto">
+        {/* Tap-once banner to unlock audio (browsers block sound until a gesture). */}
+        {!alarm.enabled && (
+          <button
+            onClick={alarm.enable}
+            className="w-full mb-6 bg-charcoal-900 text-cream-50 py-5 px-6 flex items-center justify-center gap-3 hover:bg-charcoal-800 transition-colors"
+          >
+            <span className="text-2xl">🔔</span>
+            <span className="text-sm uppercase tracking-widest font-medium">
+              Ton aktivieren — einmal antippen
+            </span>
+          </button>
+        )}
+
         {/* Header */}
         <header className="flex items-start justify-between mb-8 flex-wrap gap-4">
           <div>
@@ -115,6 +103,14 @@ export default function AdminDashboard() {
             <h1 className="heading-serif text-4xl">Bestellungen.</h1>
           </div>
           <div className="flex items-center gap-3 text-xs text-charcoal-500">
+            {alarm.enabled && !alarm.muted && counts.pending > 0 && (
+              <button
+                onClick={() => alarm.setMuted(true)}
+                className="flex items-center gap-2 bg-wine-600 text-cream-50 px-3 py-2 uppercase tracking-widest text-[11px] font-medium hover:bg-wine-700 transition-colors animate-pulse"
+              >
+                🔕 Ton aus
+              </button>
+            )}
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></span>
               Aktualisiert automatisch

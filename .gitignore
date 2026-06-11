@@ -8,6 +8,9 @@ coverage
 .vercel
 *.tsbuildinfo
 
+# Kiosk-Launcher mit echtem Geraete-Token – nur lokal, nie ins Repo
+restaurant-laptop/2-kiosk-launcher.cmd
+
 # local design-source scratch space (logo PDFs, helper scripts, work folder)
 _logo-work/
 _logo-source.pdf
