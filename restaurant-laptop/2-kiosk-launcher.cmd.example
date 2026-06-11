@@ -4,8 +4,14 @@ REM  Luma Pizza – Dashboard im Kiosk-Vollbild oeffnen
 REM  Wird vom Windows-Autostart bei jedem Hochfahren gestartet.
 REM ============================================================================
 REM
-REM  HIER den Geraete-Token eintragen (denselben Wert wie DASHBOARD_DEVICE_TOKEN
-REM  in Vercel). Den Teil  HIER-GERAETE-TOKEN  ersetzen, Anfuehrungszeichen weg.
+REM  VORLAGE. So benutzen:
+REM    1. Diese Datei kopieren und in  2-kiosk-launcher.cmd  umbenennen
+REM       (also das  .example  am Ende entfernen).
+REM    2. In der KOPIE HIER-GERAETE-TOKEN durch deinen Token ersetzen
+REM       (derselbe Wert wie DASHBOARD_DEVICE_TOKEN in Vercel).
+REM
+REM  Die echte  2-kiosk-launcher.cmd  wird NICHT zu GitHub hochgeladen
+REM  (steht in .gitignore), damit der Token geheim bleibt.
 REM ============================================================================
 
 set "TOKEN=HIER-GERAETE-TOKEN"

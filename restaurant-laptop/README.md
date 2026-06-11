@@ -41,8 +41,9 @@ Den ganzen Ordner `restaurant-laptop` (mit `1-windows-setup.ps1` und
 
 ## Schritt 3 – Werte eintragen (auf dem HP-Laptop)
 
-**a) `2-kiosk-launcher.cmd`** mit Rechtsklick → *Bearbeiten* öffnen.
-Die Zeile
+**a)** Die Vorlage **`2-kiosk-launcher.cmd.example`** kopieren und die Kopie in
+**`2-kiosk-launcher.cmd`** umbenennen (also `.example` am Ende entfernen).
+Diese Kopie mit Rechtsklick → *Bearbeiten* öffnen und die Zeile
 ```
 set "TOKEN=HIER-GERAETE-TOKEN"
 ```
@@ -51,6 +52,10 @@ set "TOKEN=HIER-GERAETE-TOKEN"
 set "TOKEN=k7f2p9x..."
 ```
 Speichern, schließen.
+
+> Warum die Kopie? Die echte `2-kiosk-launcher.cmd` mit dem Token wird bewusst
+> **nicht** zu GitHub hochgeladen (steht in `.gitignore`), damit dein Token
+> geheim bleibt. Im Repo liegt nur die `.example`-Vorlage mit Platzhalter.
 
 **b) `1-windows-setup.ps1`** mit Rechtsklick → *Bearbeiten* öffnen und oben
 ausfüllen:
