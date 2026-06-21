@@ -11,7 +11,7 @@ interface Props {
 
 export default function MenuItemCard({ item }: Props) {
   const { dispatch } = useCart()
-  const [selectedSize, setSelectedSize] = useState<'33cm' | '45cm'>('45cm')
+  const [selectedSize, setSelectedSize] = useState<'33cm' | '45cm'>('33cm')
   const [justAdded, setJustAdded] = useState(false)
   const isPizza = item.priceSmall !== undefined && item.priceLarge !== undefined
   const price = isPizza
