@@ -38,7 +38,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'pizza-calzone', category: 'Pizza', name: 'Pizza Calzone 30 cm - 33 cm', description: 'Tomatensauce, Schinken, Salami, Champignons', price: 12.50, available: true },
   { id: 'pizza-pastirma', category: 'Pizza', name: 'Pizza Pastirma', description: 'Tomatensauce, Kalbschinken, Rucola, Käse', priceSmall: 12.50, priceLarge: 21.00, available: false },
   // --- FISCH GERICHTE ---
-  { id: 'fisch-kalamari', category: 'Fisch Gerichte', name: 'Kalamari', description: 'Wahlweise mit Pommes frites, Bratkartoffeln oder Gemüse', price: 15.00, available: true },
+  { id: 'fisch-kalamari', category: 'Fisch Gerichte', name: 'Kalamari', description: 'Wahlweise mit Pommes frites, Bratkartoffeln oder Gemüse', price: 15.00, available: true, sides: ['Pommes frites', 'Bratkartoffeln', 'Gemüse', 'ohne Beilage'] },
   { id: 'fisch-garnelen', category: 'Fisch Gerichte', name: 'Garnelenpfanne', description: 'Mit Paprika, Knoblauch (scharf)', price: 12.50, available: true, tags: ['scharf'] },
   { id: 'fisch-lachs', category: 'Fisch Gerichte', name: 'Lachs', description: 'Mit gekochten Kartoffeln und Gemüse', price: 15.50, available: true },
   { id: 'fisch-oktopus', category: 'Fisch Gerichte', name: 'Oktopus Salat', description: 'Mit Gemüse', price: 14.00, available: false },
@@ -56,8 +56,8 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'snack-wings', category: 'Snacks', name: 'Chicken Wings 9 Stück', description: '', price: 11.50, available: true },
   { id: 'snack-mozzarella-sticks', category: 'Snacks', name: 'Mozzarella Sticks 9 Stück', description: '', price: 9.50, available: true },
   // --- SCHNITZEL GERICHTE ---
-  { id: 'schnitzel-puten', category: 'Schnitzel Gerichte', name: 'Putenschnitzel', description: 'Mit Salat, wahlweise Pommes frites oder Reis', price: 13.50, available: true },
-  { id: 'schnitzel-schwein', category: 'Schnitzel Gerichte', name: 'Schweineschnitzel', description: 'Mit Salat, wahlweise Pommes frites oder Reis', price: 12.50, available: true },
+  { id: 'schnitzel-puten', category: 'Schnitzel Gerichte', name: 'Putenschnitzel', description: 'Mit Salat, wahlweise Pommes frites oder Reis', price: 13.50, available: true, sides: ['Pommes frites', 'Reis', 'ohne Beilage'] },
+  { id: 'schnitzel-schwein', category: 'Schnitzel Gerichte', name: 'Schweineschnitzel', description: 'Mit Salat, wahlweise Pommes frites oder Reis', price: 12.50, available: true, sides: ['Pommes frites', 'Reis', 'ohne Beilage'] },
   // --- BEILAGEN ---
   { id: 'beilage-pommes', category: 'Beilagen', name: 'Pommes Frites', description: '', price: 6.00, available: true },
   // --- PASTA ---

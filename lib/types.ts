@@ -19,6 +19,8 @@ export interface MenuItem {
   price?: number
   priceSmall?: number
   priceLarge?: number
+  /** Wählbare Beilagen ohne Aufpreis. Die Auswahl wird im CartItem.size gespeichert. */
+  sides?: string[]
   available: boolean
   tags?: ('vegetarisch' | 'scharf' | '18+')[]
 }

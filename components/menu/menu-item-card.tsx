@@ -12,6 +12,8 @@ interface Props {
 export default function MenuItemCard({ item }: Props) {
   const { dispatch } = useCart()
   const [selectedSize, setSelectedSize] = useState<'33cm' | '45cm'>('33cm')
+  const hasSides = item.sides !== undefined && item.sides.length > 0
+  const [selectedSide, setSelectedSide] = useState<string>(item.sides?.[0] ?? '')
   const [justAdded, setJustAdded] = useState(false)
   const isPizza = item.priceSmall !== undefined && item.priceLarge !== undefined
   const price = isPizza
@@ -25,7 +27,7 @@ export default function MenuItemCard({ item }: Props) {
       item: {
         menuItemId: item.id,
         name: item.name,
-        size: isPizza ? selectedSize : null,
+        size: isPizza ? selectedSize : hasSides ? selectedSide : null,
         price,
         quantity: 1,
       },
@@ -96,6 +98,27 @@ export default function MenuItemCard({ item }: Props) {
           </p>
         )}
 
+        {hasSides && item.sides && item.available && (
+          <div className="mb-4">
+            <p className="text-xs uppercase tracking-widest text-charcoal-500 mb-1.5">Beilage</p>
+            <div className="flex flex-wrap gap-1.5">
+              {item.sides.map(side => (
+                <button
+                  key={side}
+                  onClick={() => setSelectedSide(side)}
+                  className={`px-3 py-1.5 text-xs font-medium border transition-colors ${
+                    selectedSide === side
+                      ? 'bg-charcoal-900 text-cream-50 border-charcoal-900'
+                      : 'border-charcoal-900/15 text-charcoal-700 hover:bg-cream-100 active:bg-cream-200'
+                  }`}
+                >
+                  {side}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-3 flex-wrap">
           {isPizza ? (
             <div className="flex gap-1 border border-charcoal-900/15 flex-shrink-0">
@@ -113,7 +136,7 @@ export default function MenuItemCard({ item }: Props) {
                 </button>
               ))}
             </div>
-          ) : (
+          ) : hasSides ? null : (
             <span className="text-xs uppercase tracking-widest text-charcoal-500">
               {item.category}
             </span>

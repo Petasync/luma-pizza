@@ -18,25 +18,36 @@ export interface PricedCart {
 
 class PricingError extends Error {}
 
-/** Maps the size label chosen in the UI to the matching menu price field. */
+/**
+ * Maps the variant chosen in the UI (CartItem.size) to the authoritative price.
+ * Für Pizzen trägt `size` die Größe (33cm/45cm), für Gerichte mit Beilage die
+ * gewählte Beilage (ohne Aufpreis), sonst ist `size` null.
+ */
 function priceForItem(menuItemId: string, size: string | null): number {
   const item = getItemById(menuItemId)
   if (!item) throw new PricingError(`Unbekannter Artikel: ${menuItemId}`)
   if (!item.available) throw new PricingError(`Artikel nicht verfügbar: ${item.name}`)
 
-  if (size === '33cm') {
-    if (item.priceSmall === undefined) throw new PricingError(`Größe ungültig für ${item.name}`)
-    return item.priceSmall
+  // Pizza: zwei Größen
+  if (item.priceSmall !== undefined && item.priceLarge !== undefined) {
+    if (size === '33cm') return item.priceSmall
+    if (size === '45cm') return item.priceLarge
+    throw new PricingError(`Größe ungültig für ${item.name}`)
   }
-  if (size === '45cm') {
-    if (item.priceLarge === undefined) throw new PricingError(`Größe ungültig für ${item.name}`)
-    return item.priceLarge
-  }
-  if (size === null) {
-    if (item.price === undefined) throw new PricingError(`Größe fehlt für ${item.name}`)
+
+  // Gericht mit wählbarer Beilage: `size` muss eine erlaubte Beilage sein (kein Aufpreis)
+  if (item.sides && item.sides.length > 0) {
+    if (size === null || !item.sides.includes(size)) {
+      throw new PricingError(`Beilage ungültig für ${item.name}`)
+    }
+    if (item.price === undefined) throw new PricingError(`Preis fehlt für ${item.name}`)
     return item.price
   }
-  throw new PricingError(`Größe ungültig: ${size}`)
+
+  // Einfacher Artikel ohne Variante
+  if (size !== null) throw new PricingError(`Größe ungültig: ${size}`)
+  if (item.price === undefined) throw new PricingError(`Preis fehlt für ${item.name}`)
+  return item.price
 }
 
 /**

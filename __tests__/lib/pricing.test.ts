@@ -33,6 +33,26 @@ describe('priceCart', () => {
     expect(result.items[0].name).toBe('Cheese Burger')
   })
 
+  it('accepts a valid Beilage for a dish that has sides', () => {
+    const result = priceCart([
+      { menuItemId: 'schnitzel-puten', name: 'x', size: 'Pommes frites', price: 0, quantity: 1 },
+    ])
+    expect(result.total).toBe(13.5)
+    expect(result.items[0].size).toBe('Pommes frites')
+  })
+
+  it('rejects an invalid Beilage for a dish that has sides', () => {
+    expect(() =>
+      priceCart([{ menuItemId: 'schnitzel-puten', name: 'x', size: 'Trüffelpüree', price: 0, quantity: 1 }]),
+    ).toThrow(PricingError)
+  })
+
+  it('rejects a missing Beilage for a dish that has sides', () => {
+    expect(() =>
+      priceCart([{ menuItemId: 'schnitzel-puten', name: 'x', size: null, price: 0, quantity: 1 }]),
+    ).toThrow(PricingError)
+  })
+
   it('rejects an empty cart', () => {
     expect(() => priceCart([])).toThrow(PricingError)
   })
