@@ -1,9 +1,9 @@
 import { priceCart, PricingError } from '@/lib/pricing'
 import { CartItem } from '@/lib/types'
 
-// pizza-margherita: priceSmall 8.50 (32 cm), priceLarge 9.50 (45 cm)
-// burger-cheese: price 11.00 (no size)
-// dessert-ice: available: false
+// pizza-margherita: priceSmall 10.50 (33 cm), priceLarge 17.00 (45 cm)
+// burger-cheese: price 12.50 (no size)
+// dessert-baklava: available: false
 
 describe('priceCart', () => {
   it('computes the total from the canonical menu, ignoring client prices', () => {
@@ -12,18 +12,18 @@ describe('priceCart', () => {
       { menuItemId: 'burger-cheese', name: 'x', size: null, price: 999, quantity: 1 },
     ]
     const result = priceCart(items)
-    // 2 × 9.50 + 1 × 11.00 = 30.00
-    expect(result.totalCents).toBe(3000)
-    expect(result.total).toBe(30)
-    expect(result.items[0].price).toBe(9.5)
-    expect(result.items[1].price).toBe(11)
+    // 2 × 17.00 + 1 × 12.50 = 46.50
+    expect(result.totalCents).toBe(4650)
+    expect(result.total).toBe(46.5)
+    expect(result.items[0].price).toBe(17)
+    expect(result.items[1].price).toBe(12.5)
   })
 
-  it('uses priceSmall for the 32 cm size', () => {
+  it('uses priceSmall for the 33 cm size', () => {
     const result = priceCart([
-      { menuItemId: 'pizza-margherita', name: 'x', size: '32cm', price: 0, quantity: 1 },
+      { menuItemId: 'pizza-margherita', name: 'x', size: '33cm', price: 0, quantity: 1 },
     ])
-    expect(result.total).toBe(8.5)
+    expect(result.total).toBe(10.5)
   })
 
   it('overwrites the item name with the canonical menu name', () => {
@@ -45,13 +45,13 @@ describe('priceCart', () => {
 
   it('rejects an unavailable item', () => {
     expect(() =>
-      priceCart([{ menuItemId: 'dessert-ice', name: 'x', size: null, price: 0, quantity: 1 }]),
+      priceCart([{ menuItemId: 'dessert-baklava', name: 'x', size: null, price: 0, quantity: 1 }]),
     ).toThrow(PricingError)
   })
 
   it('rejects an invalid size for the item', () => {
     expect(() =>
-      priceCart([{ menuItemId: 'burger-cheese', name: 'x', size: '32cm', price: 0, quantity: 1 }]),
+      priceCart([{ menuItemId: 'burger-cheese', name: 'x', size: '33cm', price: 0, quantity: 1 }]),
     ).toThrow(PricingError)
   })
 

@@ -39,6 +39,8 @@ const CATEGORY_POOL: Record<string, string[]> = {
   'Schnitzel Gerichte': [
     '1432139509613-5c4255815697', '1544025162-d76694265947', '1565557623262-b51c2513a641',
   ],
+  // Suppen sind aktuell nicht verfügbar — wir nutzen geprüfte Pasta-Bilder als Platzhalter.
+  'Suppen': ['1556761223-4c4282c73f77', '1645112411341-6c4fd023714a'],
   'Snacks': ['1567620832903-9fc6debc209f', '1608039755401-742074f0548d'],
   'Beilagen': ['1630384060421-cb20d0e0649d', '1573080496219-bb080dd4f877'],
   'Salate': ['1512621776951-a57141f2eefd', '1473093295043-cdd812d0e601'],

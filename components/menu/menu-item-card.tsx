@@ -11,15 +11,15 @@ interface Props {
 
 export default function MenuItemCard({ item }: Props) {
   const { dispatch } = useCart()
-  const [selectedSize, setSelectedSize] = useState<'32cm' | '45cm'>('45cm')
+  const [selectedSize, setSelectedSize] = useState<'33cm' | '45cm'>('45cm')
   const [justAdded, setJustAdded] = useState(false)
   const isPizza = item.priceSmall !== undefined && item.priceLarge !== undefined
   const price = isPizza
-    ? (selectedSize === '32cm' ? item.priceSmall! : item.priceLarge!)
-    : item.price!
+    ? (selectedSize === '33cm' ? item.priceSmall! : item.priceLarge!)
+    : item.price
 
   function handleAdd() {
-    if (!item.available) return
+    if (!item.available || price === undefined) return
     dispatch({
       type: 'ADD_ITEM',
       item: {
@@ -83,9 +83,11 @@ export default function MenuItemCard({ item }: Props) {
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-2">
           <h3 className="font-serif text-lg leading-tight text-charcoal-900">{item.name}</h3>
-          <p className="font-serif text-lg text-gold-600 whitespace-nowrap">
-            {price.toFixed(2)} €
-          </p>
+          {price !== undefined && (
+            <p className="font-serif text-lg text-gold-600 whitespace-nowrap">
+              {price.toFixed(2)} €
+            </p>
+          )}
         </div>
 
         {item.description && (
@@ -97,7 +99,7 @@ export default function MenuItemCard({ item }: Props) {
         <div className="flex items-center gap-3 flex-wrap">
           {isPizza ? (
             <div className="flex gap-1 border border-charcoal-900/15 flex-shrink-0">
-              {(['32cm', '45cm'] as const).map(size => (
+              {(['33cm', '45cm'] as const).map(size => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}

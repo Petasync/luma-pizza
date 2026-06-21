@@ -1,8 +1,8 @@
 import { cartReducer, CartState } from '@/components/cart/cart-context'
 import { CartItem } from '@/lib/types'
 
-const item1: CartItem = { menuItemId: 'pizza-margherita', name: 'Pizza Margherita', size: '45cm', price: 9.50, quantity: 1 }
-const item2: CartItem = { menuItemId: 'burger-cheese', name: 'Cheese Burger', size: null, price: 11.00, quantity: 1 }
+const item1: CartItem = { menuItemId: 'pizza-margherita', name: 'Pizza Margherita', size: '45cm', price: 17.00, quantity: 1 }
+const item2: CartItem = { menuItemId: 'burger-cheese', name: 'Cheese Burger', size: null, price: 12.50, quantity: 1 }
 
 const emptyState: CartState = { items: [] }
 
@@ -21,7 +21,7 @@ describe('cartReducer', () => {
   })
 
   it('treats same item with different size as separate', () => {
-    const item1Small = { ...item1, size: '32cm', price: 8.50 }
+    const item1Small = { ...item1, size: '33cm', price: 10.50 }
     const state1 = cartReducer(emptyState, { type: 'ADD_ITEM', item: item1 })
     const state2 = cartReducer(state1, { type: 'ADD_ITEM', item: item1Small })
     expect(state2.items).toHaveLength(2)
