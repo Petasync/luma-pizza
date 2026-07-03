@@ -6,7 +6,8 @@ import { notFound } from 'next/navigation'
 import { DELIVERY_ETA_MINUTES, PICKUP_ETA_MINUTES, formatEta } from '@/lib/business'
 import OrderStatusTracker from '@/components/order-status-tracker'
 
-export default async function OrderConfirmationPage({ params }: { params: { id: string } }) {
+export default async function OrderConfirmationPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = createSupabaseServer()
   const { data, error } = await supabase
     .from('orders')

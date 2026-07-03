@@ -8,7 +8,8 @@ const VALID_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'rea
 // GET: Status-Endpoint für den Live-Tracker auf der Bestellbestätigungsseite.
 // Schutz = die UUID selbst (unguessable, 10^36 Möglichkeiten). Gibt nur das
 // raus, was die Trackeranzeige braucht — keine zusätzliche PII.
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = createSupabaseServer()
   const { data, error } = await supabase
     .from('orders')
@@ -24,7 +25,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   })
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   // Only the restaurant may move an order through its lifecycle.
   const valid = await verifySessionToken(req.cookies.get(ADMIN_COOKIE)?.value)
   if (!valid) {

@@ -3,7 +3,8 @@ import { Order } from '@/lib/types'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
-export default async function AdminOrderDetail({ params }: { params: { id: string } }) {
+export default async function AdminOrderDetail(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = createSupabaseServer()
   const { data, error } = await supabase.from('orders').select('*').eq('id', params.id).single()
   if (error || !data) notFound()
