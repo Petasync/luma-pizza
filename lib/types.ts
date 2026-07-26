@@ -43,6 +43,12 @@ export interface Order {
   stripe_payment_intent_id?: string
   paypal_order_id?: string
   notes?: string
+  /**
+   * Zeitpunkt, zu dem Kunden- und Restaurant-Mail rausgingen. Leer bei einer
+   * bezahlten Bestellung heißt: Versand steht aus oder ist fehlgeschlagen —
+   * die nächtliche Nachtwache holt ihn dann nach.
+   */
+  benachrichtigt_am?: string | null
 }
 
 export interface CreateOrderPayload {

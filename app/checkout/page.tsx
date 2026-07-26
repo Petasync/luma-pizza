@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/navbar'
 import { useCart } from '@/components/cart/cart-context'
@@ -44,31 +44,84 @@ export default function CheckoutPage() {
   const missingForDelivery = Math.max(0, minOrder - total)
   const eta = formatEta(orderType === 'delivery' ? DELIVERY_ETA_MINUTES : PICKUP_ETA_MINUTES)
 
+  // Rückkehr von einer Zahlart mit Weiterleitung (z. B. Klarna). Stripe hängt
+  // unsere Bestell-ID an die Rücksprung-URL — damit landet der Kunde auf seiner
+  // Bestätigungsseite statt wieder in der leeren Kasse.
+  // Bewusst über window.location statt useSearchParams: das erspart eine
+  // Suspense-Grenze und funktioniert hier genauso zuverlässig.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('bestellung')
+    if (id) void bestaetigeZahlung(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  /** Die Bestelldaten, so wie der Server sie erwartet — an mehreren Stellen gebraucht. */
+  function bestelldaten(payment?: { stripeIntentId?: string; paypalOrderId?: string }) {
+    return {
+      type: orderType,
+      customer_name: contact.name,
+      customer_email: contact.email,
+      customer_phone: contact.phone,
+      delivery_address: orderType === 'delivery' ? contact.street : undefined,
+      postal_code: orderType === 'delivery' ? postalCode : undefined,
+      items: state.items,
+      total_price: total,
+      payment_method: paymentMethod,
+      notes: contact.notes,
+      stripe_payment_intent_id: payment?.stripeIntentId,
+      paypal_order_id: payment?.paypalOrderId,
+    }
+  }
+
   async function createOrder(payment?: { stripeIntentId?: string; paypalOrderId?: string }) {
     setIsSubmitting(true)
     setError('')
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: orderType,
-        customer_name: contact.name,
-        customer_email: contact.email,
-        customer_phone: contact.phone,
-        delivery_address: orderType === 'delivery' ? contact.street : undefined,
-        postal_code: orderType === 'delivery' ? postalCode : undefined,
-        items: state.items,
-        total_price: total,
-        payment_method: paymentMethod,
-        notes: contact.notes,
-        stripe_payment_intent_id: payment?.stripeIntentId,
-        paypal_order_id: payment?.paypalOrderId,
-      }),
+      body: JSON.stringify(bestelldaten(payment)),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error ?? 'Fehler beim Erstellen der Bestellung.'); setIsSubmitting(false); return }
     dispatch({ type: 'CLEAR' })
     router.push(`/bestellung/${data.id}`)
+  }
+
+  /**
+   * Kartenzahlung, Schritt 1 von 2: Bestellung anlegen, BEVOR Geld fließt.
+   * Alle Regeln (Öffnungszeiten, PLZ, Mindestbestellwert, Preise) werden hier
+   * geprüft — schlägt etwas fehl, wird gar nicht erst bezahlt.
+   */
+  async function merkeBestellungVor(stripeIntentId: string): Promise<string> {
+    setError('')
+    const res = await fetch('/api/bestellung/vormerken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bestelldaten({ stripeIntentId })),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? 'Bestellung konnte nicht angelegt werden.')
+    return data.id as string
+  }
+
+  /**
+   * Kartenzahlung, Schritt 2 von 2: dem Server melden, dass bezahlt wurde.
+   * Nur die Abkürzung für eine schnelle Bestätigungsseite — falls dieser Aufruf
+   * scheitert, erledigt der Stripe-Webhook dasselbe serverseitig.
+   */
+  async function bestaetigeZahlung(orderId: string) {
+    setIsSubmitting(true)
+    try {
+      await fetch('/api/bestellung/bestaetigen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+      })
+    } catch {
+      /* Der Webhook fängt es auf — der Kunde soll trotzdem seine Seite sehen. */
+    }
+    dispatch({ type: 'CLEAR' })
+    router.push(`/bestellung/${orderId}`)
   }
 
   if (state.items.length === 0) {
@@ -184,7 +237,8 @@ export default function CheckoutPage() {
                       {paymentMethod === 'card' && (
                         <StripePayment
                           amount={total}
-                          onSuccess={pid => createOrder({ stripeIntentId: pid })}
+                          onBeforeConfirm={merkeBestellungVor}
+                          onSuccess={bestaetigeZahlung}
                           onError={msg => setError(msg)}
                         />
                       )}

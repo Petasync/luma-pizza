@@ -290,3 +290,68 @@ Bestell-ID: ${order.id}`
   })
   if (error) throw new Error(`Resend restaurant mail failed: ${JSON.stringify(error)}`)
 }
+
+// -----------------------------------------------------------------------------
+// Alarm-Mails an den Betreiber (nicht an Kunden)
+// -----------------------------------------------------------------------------
+
+/**
+ * Empfänger für technische Alarme. Getrennt einstellbar, damit Störungsmeldungen
+ * nicht zwangsläufig im Bestell-Postfach der Küche landen. Ohne ALARM_EMAIL
+ * gehen sie an dieselben Adressen wie die Bestellungen.
+ */
+function alarmEmpfaenger(): string[] {
+  const roh = process.env.ALARM_EMAIL ?? process.env.RESTAURANT_EMAIL ?? ''
+  return roh.split(',').map(s => s.trim()).filter(Boolean)
+}
+
+async function sendeAlarm(betreff: string, zeilen: string[]) {
+  const to = alarmEmpfaenger()
+  if (to.length === 0) return
+
+  const text = zeilen.join('\n')
+  const bodyHtml = `
+    <tr><td style="padding:32px 32px 24px;">
+      <p style="margin:0 0 6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#A6701A;">Systemmeldung</p>
+      <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;color:${BRAND.charcoal};">${escapeHtml(betreff)}</h1>
+      <pre style="margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;color:${BRAND.text};white-space:pre-wrap;">${escapeHtml(text)}</pre>
+    </td></tr>`
+
+  const { error } = await resend.emails.send({
+    from: FROM_RESTAURANT,
+    to,
+    subject: betreff,
+    text,
+    html: shellHtml({ preheader: zeilen[0] ?? betreff, bodyHtml }),
+  })
+  if (error) throw new Error(`Resend alarm mail failed: ${JSON.stringify(error)}`)
+}
+
+/**
+ * Der Ernstfall: Stripe meldet eine erfolgreiche Zahlung, zu der es keine
+ * Bestellung gibt. Genau das ist am 26.07.2026 unbemerkt passiert — ab jetzt
+ * gibt es dafür sofort eine Mail mit allen Daten zum Nachtragen oder Erstatten.
+ */
+export async function sendeZahlungOhneBestellung(z: {
+  zahlungsId: string
+  betragCent: number
+  email: string | null
+  zeitpunkt: Date
+}) {
+  await sendeAlarm('🚨 Zahlung ohne Bestellung — bitte sofort prüfen', [
+    'Stripe hat eine erfolgreiche Zahlung gemeldet, zu der KEINE Bestellung in der Datenbank existiert.',
+    '',
+    `Betrag:        ${formatEuro(z.betragCent / 100)}`,
+    `Zahlungs-ID:   ${z.zahlungsId}`,
+    `E-Mail:        ${z.email ?? 'unbekannt'}`,
+    `Zeitpunkt:     ${z.zeitpunkt.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
+    '',
+    'Bitte im Stripe-Dashboard nachsehen, den Kunden kontaktieren und die',
+    'Bestellung nachtragen oder das Geld erstatten.',
+  ])
+}
+
+/** Sammelbericht der nächtlichen Nachtwache — nur bei Auffälligkeiten. */
+export async function sendeNachtwacheBericht(betreff: string, zeilen: string[]) {
+  await sendeAlarm(betreff, zeilen)
+}

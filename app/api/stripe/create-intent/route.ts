@@ -14,5 +14,10 @@ export async function POST(req: NextRequest) {
     automatic_payment_methods: { enabled: true },
   })
 
-  return NextResponse.json({ clientSecret: paymentIntent.client_secret })
+  // Die ID wird gebraucht, um direkt vor der Zahlung die Bestellung vorzumerken
+  // (siehe /api/bestellung/vormerken) und sie an den Zahlungsvorgang zu hängen.
+  return NextResponse.json({
+    clientSecret: paymentIntent.client_secret,
+    paymentIntentId: paymentIntent.id,
+  })
 }

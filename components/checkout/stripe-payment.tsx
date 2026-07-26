@@ -6,11 +6,17 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder')
 
 interface FormProps {
-  onSuccess: (paymentIntentId: string) => void
+  /**
+   * Läuft NOCH VOR dem Einzug des Geldes. Legt die Bestellung serverseitig an
+   * und prüft dabei Öffnungszeiten, Liefergebiet, Mindestbestellwert und Preise.
+   * Gibt die Bestell-ID zurück — oder wirft, dann wird gar nicht erst bezahlt.
+   */
+  onBeforeConfirm: () => Promise<string>
+  onSuccess: (orderId: string) => void
   onError: (msg: string) => void
 }
 
-function PaymentForm({ onSuccess, onError }: FormProps) {
+function PaymentForm({ onBeforeConfirm, onSuccess, onError }: FormProps) {
   const stripe = useStripe()
   const elements = useElements()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,18 +25,33 @@ function PaymentForm({ onSuccess, onError }: FormProps) {
     e.preventDefault()
     if (!stripe || !elements) return
     setIsSubmitting(true)
+
+    // Erst die Bestellung sichern, dann kassieren. Andersherum konnte das Geld
+    // eingezogen werden und die Bestellung trotzdem nirgends ankommen.
+    let orderId: string
+    try {
+      orderId = await onBeforeConfirm()
+    } catch (e) {
+      onError(e instanceof Error ? e.message : 'Bestellung konnte nicht angelegt werden.')
+      setIsSubmitting(false)
+      return
+    }
+
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       redirect: 'if_required',
       confirmParams: {
-        return_url: `${window.location.origin}/checkout`,
+        // Bei Zahlarten mit Weiterleitung (z. B. Klarna) kommt der Kunde hier
+        // zurück. Die Bestell-ID steht in der URL, damit die Bestätigungsseite
+        // sie auch dann findet, wenn der Warenkorb-Zustand weg ist.
+        return_url: `${window.location.origin}/checkout?bestellung=${orderId}`,
       },
     })
     if (error) {
       onError(error.message ?? 'Zahlung fehlgeschlagen.')
       setIsSubmitting(false)
     } else if (paymentIntent?.status === 'succeeded') {
-      onSuccess(paymentIntent.id)
+      onSuccess(orderId)
     } else {
       setIsSubmitting(false)
     }
@@ -52,12 +73,15 @@ function PaymentForm({ onSuccess, onError }: FormProps) {
 
 interface Props {
   amount: number
-  onSuccess: (paymentIntentId: string) => void
+  /** Erhält die ID des Zahlungsvorgangs, legt die Bestellung an, liefert die Bestell-ID. */
+  onBeforeConfirm: (paymentIntentId: string) => Promise<string>
+  onSuccess: (orderId: string) => void
   onError: (msg: string) => void
 }
 
-export default function StripePayment({ amount, onSuccess, onError }: Props) {
+export default function StripePayment({ amount, onBeforeConfirm, onSuccess, onError }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
   const [initError, setInitError] = useState<string | null>(null)
   // Stabilize callbacks via refs to avoid effect re-runs that would mutate clientSecret.
   const onErrorRef = useRef(onError)
@@ -77,6 +101,7 @@ export default function StripePayment({ amount, onSuccess, onError }: Props) {
         if (cancelled) return
         if (data.clientSecret) {
           setClientSecret(data.clientSecret)
+          setPaymentIntentId(data.paymentIntentId ?? null)
         } else {
           setInitError(data.error ?? 'Stripe konnte nicht initialisiert werden.')
           onErrorRef.current(data.error ?? 'Stripe konnte nicht initialisiert werden.')
@@ -118,7 +143,14 @@ export default function StripePayment({ amount, onSuccess, onError }: Props) {
         },
       }}
     >
-      <PaymentForm onSuccess={onSuccess} onError={onError} />
+      <PaymentForm
+        onBeforeConfirm={async () => {
+          if (!paymentIntentId) throw new Error('Zahlungsvorgang nicht bereit. Bitte Seite neu laden.')
+          return onBeforeConfirm(paymentIntentId)
+        }}
+        onSuccess={onSuccess}
+        onError={onError}
+      />
     </Elements>
   )
 }
