@@ -65,8 +65,11 @@ input, textarea, select {
   .container-wide {
     @apply max-w-7xl mx-auto;
   }
+  /* text-gold-700 statt text-gold-600: Kontrast auf Cream-Hintergrund war nur
+     3,2:1 (WCAG-Formel), gefordert sind 4,5:1 für kleinen/normalen Text.
+     gold-700 (#8A6C37) auf cream-50 (#FBF8F1) liegt bei ≈4,62:1. */
   .eyebrow {
-    @apply text-xs font-medium uppercase tracking-widest text-gold-600;
+    @apply text-xs font-medium uppercase tracking-widest text-gold-700;
   }
   .heading-serif {
     @apply font-serif font-normal leading-tight;
