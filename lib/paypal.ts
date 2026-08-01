@@ -39,19 +39,52 @@ async function getAccessToken(): Promise<string> {
   return data.access_token as string
 }
 
-/** Roher Abruf einer PayPal-Bestellung — von den beiden Prüf-Funktionen unten geteilt. */
-async function holePayPalBestellung(orderId: string): Promise<any> {
+/**
+ * Wird geworfen, wenn die Anfrage an PayPal selbst (technisch) fehlgeschlagen
+ * ist — Netzwerkfehler, 5xx, Rate-Limit (429), ein sonst unerwarteter
+ * Statuscode. Das ist AUSDRÜCKLICH NICHT dasselbe wie "PayPal sagt: nicht
+ * bezahlt" und darf von keinem Aufrufer mit `false`/`null`/"nicht bezahlt"
+ * verwechselt werden — genau diese Verwechslung hätte den Vorfall vom
+ * 26.07.2026 auf einem anderen Weg wiederholen können: eine tatsächlich
+ * bezahlte Bestellung darf niemals wegen eines vorübergehenden PayPal-
+ * Ausfalls als "failed" enden.
+ */
+export class PayPalAbfrageFehlgeschlagen extends Error {}
+
+/**
+ * Roher Abruf einer PayPal-Bestellung — von den beiden Prüf-Funktionen unten
+ * geteilt.
+ *
+ * Unterscheidet bewusst zwei völlig verschiedene Fälle:
+ *  - **404 Not Found** ist eine verlässliche INHALTLICHE Auskunft von PayPal
+ *    ("diese Bestellung existiert nicht") → `null`.
+ *  - **Jeder andere Fehlerstatus** (5xx, 429, 401/403, sonst etwas
+ *    Unerwartetes) ist KEINE verlässliche Auskunft, sondern eine gescheiterte
+ *    Anfrage → wirft `PayPalAbfrageFehlgeschlagen`. Aufrufer (z. B. die
+ *    Nachtwache) müssen das über try/catch von "nicht bezahlt" trennen und
+ *    dürfen im Fehlerfall NICHTS abstempeln.
+ */
+async function holePayPalBestellung(orderId: string): Promise<any | null> {
   const token = await getAccessToken()
   const res = await fetch(`${BASE_URL}/v2/checkout/orders/${encodeURIComponent(orderId)}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) return null
+  if (res.status === 404) return null
+  if (!res.ok) {
+    throw new PayPalAbfrageFehlgeschlagen(
+      `PayPal-Abfrage für Bestellung ${orderId} fehlgeschlagen: HTTP ${res.status}.`,
+    )
+  }
   return res.json()
 }
 
 /**
  * Confirms a PayPal order is COMPLETED and was paid for the expected amount.
- * Returns true only on a fully verified match.
+ * Returns `true`/`false` nur bei einer verlässlichen Auskunft von PayPal
+ * (inkl. "404 = existiert nicht" → `false`). Schlägt die Abfrage selbst
+ * fehl (5xx, Rate-Limit, Netzwerk), wirft diese Funktion
+ * `PayPalAbfrageFehlgeschlagen` — der Aufrufer MUSS das getrennt von "false"
+ * behandeln (nicht als "nicht bezahlt" werten).
  */
 export async function verifyPayPalOrder(orderId: string, expectedCents: number): Promise<boolean> {
   if (!isPayPalConfigured()) return false
@@ -81,6 +114,9 @@ export async function verifyPayPalOrder(orderId: string, expectedCents: number):
  * aber noch nichts wurde kassiert. Ein bereits "COMPLETED"er Status wird
  * bewusst ABGELEHNT — das würde bedeuten, dass am Vormerken vorbei schon
  * kassiert wurde, und genau diese Reihenfolge soll ja verhindert werden.
+ *
+ * Wie bei `verifyPayPalOrder`: Schlägt die Abfrage selbst fehl, wirft diese
+ * Funktion `PayPalAbfrageFehlgeschlagen` statt `false` zurückzugeben.
  */
 export async function pruefePayPalVorabBetrag(orderId: string, expectedCents: number): Promise<boolean> {
   if (!isPayPalConfigured()) return false
@@ -95,24 +131,6 @@ export async function pruefePayPalVorabBetrag(orderId: string, expectedCents: nu
 
   const cents = Math.round(parseFloat(amount.value) * 100)
   return cents === expectedCents
-}
-
-/**
- * Für die nächtliche Nachtwache: nur der aktuelle Rohstatus, ohne Wertung.
- * `null` heißt ausdrücklich "die Abfrage selbst ist fehlgeschlagen" (Netz,
- * Konfiguration, PayPal down) — das ist NICHT dasselbe wie "nicht bezahlt" und
- * muss vom Aufrufer unterschiedlich behandelt werden (nicht anfassen statt
- * fälschlich auf "failed" zu setzen).
- */
-export async function holePayPalStatus(orderId: string): Promise<string | null> {
-  if (!isPayPalConfigured()) return null
-  if (!orderId) return null
-  try {
-    const order = await holePayPalBestellung(orderId)
-    return order?.status ?? null
-  } catch {
-    return null
-  }
 }
 
 /**

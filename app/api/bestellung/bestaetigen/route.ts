@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
   if (ergebnis.ergebnis === 'nicht-gefunden') {
     return NextResponse.json({ error: 'Bestellung nicht gefunden.' }, { status: 404 })
   }
-  if (ergebnis.ergebnis === 'neu' && ergebnis.mailFehler) {
+  if ((ergebnis.ergebnis === 'neu' || ergebnis.ergebnis === 'korrigiert') && ergebnis.mailFehler) {
     // Die Bestellung steht — nur die Mail hakt. Die Nachtwache holt sie nach.
     console.error('Bestätigungsmail fehlgeschlagen:', ergebnis.mailFehler)
   }

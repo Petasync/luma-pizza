@@ -180,6 +180,15 @@ export async function GET(req: NextRequest) {
           `🚨 Bestellung ${kennzeichen} war tatsächlich bezahlt, stand aber noch als "pending" — ` +
             'jetzt auf "bezahlt" nachgetragen und Mails verschickt.',
         )
+      } else if (ergebnis.ergebnis === 'korrigiert') {
+        // Seltener Randfall: die Zeile stand zwischen unserem Lesen und diesem
+        // Aufruf schon auf "failed" (z. B. ein paralleler Fehlschlag-Webhook).
+        // markiereAlsBezahlt() korrigiert das und alarmiert bereits selbst —
+        // hier zusätzlich in den Nachtwache-Bericht aufnehmen.
+        meldungen.push(
+          `🚨 Bestellung ${kennzeichen} stand bereits auf "failed", war aber tatsächlich bezahlt — ` +
+            'jetzt korrigiert und Mails verschickt.',
+        )
       }
       // 'schon-bezahlt' kann hier praktisch nicht vorkommen (wir haben die Zeile
       // gerade erst als "pending" gelesen) — dann ist ohnehin nichts mehr zu tun.
