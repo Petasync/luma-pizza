@@ -44,7 +44,7 @@ export default function BestellenPage() {
               schnell geliefert oder zur Abholung bereit.
             </p>
             <p className="text-cream-100/50 text-xs mt-3">
-              Alle Preise sind Endpreise inklusive der gesetzlichen Mehrwertsteuer.
+              Alle Preise sind Endpreise. Es kommen keine weiteren Kosten hinzu.
             </p>
           </div>
         </section>

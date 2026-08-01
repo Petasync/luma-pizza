@@ -255,7 +255,7 @@ export default function CheckoutPage() {
                     </Link>.
                   </p>
                   <p>
-                    Alle Preise sind Endpreise inklusive der gesetzlichen Mehrwertsteuer.
+                    Alle Preise sind Endpreise. Es kommen keine weiteren Kosten hinzu.
                   </p>
                   <p>
                     Da es sich um frische, schnell verderbliche Speisen mit vereinbartem
