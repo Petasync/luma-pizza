@@ -114,7 +114,7 @@ async function verarbeiteErfolg(event: PayPalWebhookEvent) {
   }
 
   const ergebnis = await markiereAlsBezahlt(orderId)
-  if (ergebnis.ergebnis === 'neu' && ergebnis.mailFehler) {
+  if ((ergebnis.ergebnis === 'neu' || ergebnis.ergebnis === 'korrigiert') && ergebnis.mailFehler) {
     console.error('Bestätigungsmail fehlgeschlagen:', ergebnis.mailFehler)
   }
 }

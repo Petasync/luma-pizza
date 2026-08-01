@@ -357,3 +357,27 @@ export async function sendeZahlungOhneBestellung(z: {
 export async function sendeNachtwacheBericht(betreff: string, zeilen: string[]) {
   await sendeAlarm(betreff, zeilen)
 }
+
+/**
+ * Eine Bestellung stand auf "failed", ein bestätigter Zahlungseingang hat sie
+ * jetzt auf "bezahlt" korrigiert (siehe `markiereAlsBezahlt` in
+ * `lib/bezahlung.ts`). Das darf NIE unbemerkt bleiben: Es bedeutet, dass eine
+ * frühere Prüfung (Webhook, Nachtwache, `/bestaetigen`) fälschlich "nicht
+ * bezahlt" ergeben hat.
+ */
+export async function sendeBezahlungKorrigiert(order: Order) {
+  await sendeAlarm('🚨 Bestellung war fälschlich "failed" — jetzt auf "bezahlt" korrigiert', [
+    'Eine Bestellung stand als "failed" in der Datenbank. Gerade eben hat ein',
+    'bestätigter Zahlungseingang (Webhook/Bestätigung/Nachtwache) gezeigt, dass',
+    'sie doch bezahlt wurde — sie wurde soeben auf "bezahlt" korrigiert und die',
+    'Bestätigungsmails wurden verschickt.',
+    '',
+    `Bestellung:  ${order.id.slice(0, 8).toUpperCase()}`,
+    `Betrag:      ${formatEuro(Number(order.total_price))}`,
+    `Kunde:       ${order.customer_name} <${order.customer_email}>`,
+    `Zahlart:     ${order.payment_method}`,
+    '',
+    'Bitte prüfen, WARUM sie vorher fälschlich als fehlgeschlagen galt (z. B.',
+    'ein PayPal-/Stripe-API-Ausfall bei einer früheren Prüfung).',
+  ])
+}
