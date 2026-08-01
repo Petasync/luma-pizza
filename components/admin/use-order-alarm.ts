@@ -37,17 +37,25 @@ function playAlarm(ctx: AudioContext) {
  * AudioContext is only created via `enable()` (the dashboard shows a tap-once
  * banner). "Ton aus" mutes the current burst; a newly arriving order un-mutes.
  */
-export function useOrderAlarm(pendingCount: number) {
+export function useOrderAlarm(pendingCount: number, stoerung = false) {
   const [enabled, setEnabled] = useState(false)
   const [muted, setMuted] = useState(false)
   const ctxRef = useRef<AudioContext | null>(null)
   const prevPending = useRef(pendingCount)
+  const prevStoerung = useRef(stoerung)
 
   // A rise in pending orders means a new order arrived — re-arm the alarm.
   useEffect(() => {
     if (pendingCount > prevPending.current) setMuted(false)
     prevPending.current = pendingCount
   }, [pendingCount])
+
+  // Eine neu aufgetretene Störung ebenfalls: ein stumm geschaltetes Terminal
+  // darf nicht ausgerechnet den Ausfall verschlafen.
+  useEffect(() => {
+    if (stoerung && !prevStoerung.current) setMuted(false)
+    prevStoerung.current = stoerung
+  }, [stoerung])
 
   function enable() {
     if (ctxRef.current) return
@@ -63,7 +71,7 @@ export function useOrderAlarm(pendingCount: number) {
   }
 
   useEffect(() => {
-    if (!enabled || muted || pendingCount < 1) return
+    if (!enabled || muted || (pendingCount < 1 && !stoerung)) return
     const ctx = ctxRef.current
     if (!ctx) return
 
@@ -80,7 +88,7 @@ export function useOrderAlarm(pendingCount: number) {
       stopped = true
       clearInterval(id)
     }
-  }, [enabled, muted, pendingCount])
+  }, [enabled, muted, pendingCount, stoerung])
 
   return { enabled, enable, muted, setMuted }
 }

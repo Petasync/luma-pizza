@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ADMIN_COOKIE, ADMIN_COOKIE_MAX_AGE, createSessionToken, verifyDeviceToken } from '@/lib/admin-auth'
+import {
+  ADMIN_COOKIE,
+  ADMIN_COOKIE_MAX_AGE,
+  DEVICE_COOKIE,
+  DEVICE_COOKIE_MAX_AGE,
+  createDeviceCookie,
+  createSessionToken,
+  verifyDeviceToken,
+} from '@/lib/admin-auth'
 
 /**
  * Device login for the restaurant kiosk terminal. The laptop opens
@@ -19,12 +27,21 @@ export async function GET(req: NextRequest) {
   url.pathname = '/admin'
   url.search = ''
   const res = NextResponse.redirect(url)
-  res.cookies.set(ADMIN_COOKIE, await createSessionToken(), {
+  const cookieBasis = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: ADMIN_COOKIE_MAX_AGE,
+    sameSite: 'lax' as const,
     path: '/',
+  }
+  res.cookies.set(ADMIN_COOKIE, await createSessionToken(), {
+    ...cookieBasis,
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+  })
+  // Langlebiges Geräte-Cookie: damit kann das Terminal seine 7-Tage-Sitzung
+  // selbst erneuern, wenn sie mitten im Betrieb abläuft (siehe /api/admin/refresh).
+  res.cookies.set(DEVICE_COOKIE, await createDeviceCookie(), {
+    ...cookieBasis,
+    maxAge: DEVICE_COOKIE_MAX_AGE,
   })
   return res
 }

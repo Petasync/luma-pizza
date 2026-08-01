@@ -24,26 +24,61 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('aktiv')
+  /**
+   * Warum das wichtig ist: Bis zum 26.07.2026 wurde ein Abrufversagen hier
+   * stillschweigend verschluckt (`if (!res.ok) return`). Als die Sitzung des
+   * Terminals nach 7 Tagen ablief, lieferte der Server nur noch 401 — die Seite
+   * sah aber völlig normal aus und zeigte weiter die alte Liste. Neue
+   * Bestellungen kamen nie an und niemand konnte es sehen. Deshalb wird ein
+   * anhaltender Fehler jetzt groß angezeigt UND vertont.
+   */
+  const [stoerung, setStoerung] = useState<string | null>(null)
 
   useEffect(() => {
     // Orders carry customer PII, so they're behind RLS — we poll the
     // admin-only API route instead of reading Supabase from the browser.
     let active = true
 
+    async function hole(): Promise<Response> {
+      return fetch('/api/admin/orders', { cache: 'no-store' })
+    }
+
     async function load() {
       try {
-        const res = await fetch('/api/admin/orders', { cache: 'no-store' })
+        let res = await hole()
+
+        // Sitzung abgelaufen? Das Terminal erneuert sie über sein Geräte-Cookie
+        // selbst und versucht es genau einmal erneut.
+        if (res.status === 401) {
+          const erneuert = await fetch('/api/admin/refresh', { method: 'POST' })
+          if (erneuert.ok) {
+            res = await hole()
+          } else if (active) {
+            setStoerung('Das Terminal ist nicht mehr angemeldet. Bitte den Laptop neu starten.')
+            setLoading(false)
+            return
+          }
+        }
+
         if (!res.ok) {
-          if (active) setLoading(false)
+          if (active) {
+            setStoerung(`Bestellungen konnten nicht geladen werden (Fehler ${res.status}).`)
+            setLoading(false)
+          }
           return
         }
+
         const { orders: fetched } = (await res.json()) as { orders: Order[] }
         if (!active) return
 
         setOrders(fetched)
+        setStoerung(null)
         setLoading(false)
       } catch {
-        if (active) setLoading(false)
+        if (active) {
+          setStoerung('Keine Verbindung zum Server. Internet prüfen.')
+          setLoading(false)
+        }
       }
     }
 
@@ -69,8 +104,9 @@ export default function AdminDashboard() {
     ready: orders.filter(o => o.status === 'ready').length,
   }), [orders])
 
-  // Audible alarm for the terminal — rings while orders await confirmation.
-  const alarm = useOrderAlarm(counts.pending)
+  // Audible alarm for the terminal — rings while orders await confirmation
+  // und ebenso, solange keine Bestellungen abgerufen werden können.
+  const alarm = useOrderAlarm(counts.pending, stoerung !== null)
 
   if (loading) {
     return (
@@ -83,6 +119,24 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-cream-100 p-4 sm:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto">
+        {/* Störung: darf man nicht übersehen können. Vorher fiel genau dieser
+            Fall komplett stumm aus — die Seite sah normal aus, war aber blind. */}
+        {stoerung && (
+          <div
+            role="alert"
+            className="mb-6 bg-wine-600 text-cream-50 px-6 py-6 border-4 border-wine-700 animate-pulse"
+          >
+            <p className="text-sm uppercase tracking-widest font-semibold mb-2">
+              ⚠ Achtung — keine Verbindung zu den Bestellungen
+            </p>
+            <p className="text-lg leading-snug">{stoerung}</p>
+            <p className="text-sm mt-3 text-cream-100/90">
+              Solange dieser Balken zu sehen ist, werden <strong>keine neuen Bestellungen angezeigt</strong>.
+              Bitte telefonisch erreichbar bleiben und Phillip Bescheid geben.
+            </p>
+          </div>
+        )}
+
         {/* Tap-once banner to unlock audio (browsers block sound until a gesture). */}
         {!alarm.enabled && (
           <button
@@ -103,7 +157,7 @@ export default function AdminDashboard() {
             <h1 className="heading-serif text-4xl">Bestellungen.</h1>
           </div>
           <div className="flex items-center gap-3 text-xs text-charcoal-500">
-            {alarm.enabled && !alarm.muted && counts.pending > 0 && (
+            {alarm.enabled && !alarm.muted && (counts.pending > 0 || stoerung) && (
               <button
                 onClick={() => alarm.setMuted(true)}
                 className="flex items-center gap-2 bg-wine-600 text-cream-50 px-3 py-2 uppercase tracking-widest text-[11px] font-medium hover:bg-wine-700 transition-colors animate-pulse"

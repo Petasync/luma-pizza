@@ -15,6 +15,11 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase
     .from('orders')
     .select('*')
+    // Karten- und PayPal-Bestellungen werden seit dem 26.07.2026 schon vor der
+    // Zahlung angelegt. Solange sie nicht bezahlt sind, gehören sie nicht in die
+    // Küche — sonst würde dort für abgebrochene Zahlungen gekocht. Barzahlung
+    // ist davon ausgenommen: die ist per Definition erst bei Übergabe bezahlt.
+    .or('payment_method.eq.cash,payment_status.eq.paid')
     .order('created_at', { ascending: false })
     .limit(100)
 

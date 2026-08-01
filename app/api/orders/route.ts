@@ -1,61 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
-import { sendOrderConfirmationToCustomer, sendNewOrderToRestaurant } from '@/lib/resend'
 import { CreateOrderPayload, Order, PaymentStatus } from '@/lib/types'
-import { priceCart, PricingError } from '@/lib/pricing'
 import { stripe } from '@/lib/stripe'
 import { verifyPayPalOrder } from '@/lib/paypal'
-import { isDeliverable } from '@/lib/postal-codes'
-import { isOpen, getOpeningStatus } from '@/lib/opening-hours'
-import { getMinOrderForPostalCode } from '@/lib/business'
+import { pruefeBestellung, bestellungsZeile } from '@/lib/bestellung-pruefen'
+import { markiereAlsBezahlt, verschickeBestaetigungen } from '@/lib/bezahlung'
 
+/**
+ * Bestellung anlegen.
+ *
+ * Für **Barzahlung** und **PayPal** ist das nach wie vor der einzige Weg.
+ *
+ * Für **Kartenzahlung** gilt seit dem 26.07.2026 ein anderer Ablauf: die
+ * Bestellung wird über `/api/bestellung/vormerken` VOR der Zahlung angelegt und
+ * danach vom Stripe-Webhook auf "bezahlt" gesetzt. Diese Route bleibt für Karten
+ * nur als Auffanglösung — etwa wenn ein Kunde die Seite noch in der alten
+ * Fassung offen hat.
+ */
 export async function POST(req: NextRequest) {
   const body: CreateOrderPayload = await req.json()
 
-  // --- Öffnungszeiten: außerhalb keine Bestellungen annehmen ---
-  if (!isOpen()) {
-    const status = getOpeningStatus()
-    const next = status.open ? '' : ` Wir öffnen ${status.nextOpenLabel} um ${status.nextOpenTime} Uhr.`
-    return NextResponse.json(
-      { error: `Wir nehmen aktuell keine Bestellungen entgegen.${next}` },
-      { status: 503 },
-    )
+  const { fehler, priced } = pruefeBestellung(body)
+  if (fehler || !priced) {
+    return NextResponse.json({ error: fehler!.nachricht }, { status: fehler!.status })
   }
 
-  // --- basic field validation ---
-  if (!body.customer_name || !body.customer_email || !body.customer_phone) {
-    return NextResponse.json({ error: 'Kontaktdaten fehlen.' }, { status: 400 })
-  }
-  if (body.type === 'delivery') {
-    if (!body.delivery_address || !body.postal_code) {
-      return NextResponse.json({ error: 'Lieferadresse fehlt.' }, { status: 400 })
-    }
-    if (!isDeliverable(body.postal_code)) {
-      return NextResponse.json({ error: 'Wir liefern leider nicht an diese PLZ.' }, { status: 400 })
-    }
-  }
-
-  // --- authoritative pricing: the browser is not trusted, recompute everything ---
-  let priced
-  try {
-    priced = priceCart(body.items)
-  } catch (e) {
-    const msg = e instanceof PricingError ? e.message : 'Warenkorb ungültig.'
-    return NextResponse.json({ error: msg }, { status: 400 })
-  }
-
-  // --- Mindestbestellwert bei Lieferung (ortsabhängig) ---
-  if (body.type === 'delivery') {
-    const minOrder = getMinOrderForPostalCode(body.postal_code)
-    if (priced.total < minOrder) {
-      return NextResponse.json(
-        { error: `Mindestbestellwert für Lieferung: ${minOrder},00 €.` },
-        { status: 400 },
-      )
-    }
-  }
-
-  // --- payment verification: never mark an order paid on the client's word ---
+  // --- Zahlung prüfen: niemals dem Browser glauben, dass bezahlt wurde ---
   let paymentStatus: PaymentStatus
   if (body.payment_method === 'cash') {
     paymentStatus = 'pending'
@@ -63,18 +33,28 @@ export async function POST(req: NextRequest) {
     if (!body.stripe_payment_intent_id) {
       return NextResponse.json({ error: 'Zahlung nicht bestätigt.' }, { status: 400 })
     }
-    try {
-      const intent = await stripe.paymentIntents.retrieve(body.stripe_payment_intent_id)
-      if (
-        intent.status !== 'succeeded' ||
-        intent.currency !== 'eur' ||
-        intent.amount !== priced.totalCents
-      ) {
-        return NextResponse.json({ error: 'Zahlung konnte nicht verifiziert werden.' }, { status: 402 })
-      }
-    } catch {
+    if (!(await zahlungIstEcht(body.stripe_payment_intent_id, priced.totalCents))) {
       return NextResponse.json({ error: 'Zahlung konnte nicht verifiziert werden.' }, { status: 402 })
     }
+
+    // Gibt es zu diesem Zahlungsvorgang schon eine Vormerkung? Dann ist das hier
+    // ein Doppel-Aufruf — die vorhandene Bestellung bestätigen statt eine zweite
+    // anzulegen (der eindeutige Index würde das ohnehin ablehnen).
+    const supabaseVorab = createSupabaseServer()
+    const { data: vorhanden } = await supabaseVorab
+      .from('orders')
+      .select('id')
+      .eq('stripe_payment_intent_id', body.stripe_payment_intent_id)
+      .maybeSingle()
+
+    if (vorhanden) {
+      const ergebnis = await markiereAlsBezahlt(vorhanden.id as string)
+      if (ergebnis.ergebnis === 'neu' && ergebnis.mailFehler) {
+        console.error('Bestätigungsmail fehlgeschlagen:', ergebnis.mailFehler)
+      }
+      return NextResponse.json({ id: vorhanden.id }, { status: 200 })
+    }
+
     paymentStatus = 'paid'
   } else if (body.payment_method === 'paypal') {
     let ok = false
@@ -91,24 +71,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Ungültige Zahlungsart.' }, { status: 400 })
   }
 
-  // --- persist (prices/items come from priceCart, not the request body) ---
+  // --- speichern (Preise/Artikel kommen aus priceCart, nicht aus dem Request) ---
   const supabase = createSupabaseServer()
   const { data, error } = await supabase
     .from('orders')
     .insert({
-      type: body.type,
-      customer_name: body.customer_name,
-      customer_email: body.customer_email,
-      customer_phone: body.customer_phone,
-      delivery_address: body.type === 'delivery' ? body.delivery_address : null,
-      postal_code: body.type === 'delivery' ? body.postal_code : null,
-      items: priced.items,
-      total_price: priced.total,
-      payment_method: body.payment_method,
+      ...bestellungsZeile(body, priced),
       payment_status: paymentStatus,
       stripe_payment_intent_id: body.stripe_payment_intent_id ?? null,
       paypal_order_id: body.paypal_order_id ?? null,
-      notes: body.notes ?? null,
     })
     .select()
     .single()
@@ -123,14 +94,20 @@ export async function POST(req: NextRequest) {
   }
 
   const order = data as Order
-  try {
-    await Promise.all([
-      sendOrderConfirmationToCustomer(order),
-      sendNewOrderToRestaurant(order),
-    ])
-  } catch (emailError) {
-    console.error('Email error (non-fatal):', emailError)
+  const mailFehler = await verschickeBestaetigungen(order)
+  if (mailFehler) {
+    // Nicht fatal — die Bestellung steht. Die Nachtwache holt den Versand nach.
+    console.error('Bestätigungsmail fehlgeschlagen:', mailFehler)
   }
 
   return NextResponse.json({ id: order.id }, { status: 201 })
+}
+
+async function zahlungIstEcht(intentId: string, erwarteteCents: number): Promise<boolean> {
+  try {
+    const intent = await stripe.paymentIntents.retrieve(intentId)
+    return intent.status === 'succeeded' && intent.currency === 'eur' && intent.amount === erwarteteCents
+  } catch {
+    return false
+  }
 }
