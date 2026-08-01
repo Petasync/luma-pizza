@@ -1,4 +1,4 @@
-import { verifyDeviceToken, createSessionToken, verifySessionToken } from '@/lib/admin-auth'
+import { verifyDeviceToken, createSessionToken, verifySessionToken, getTokenExpiryMs } from '@/lib/admin-auth'
 
 describe('verifyDeviceToken', () => {
   const ORIGINAL = process.env.DASHBOARD_DEVICE_TOKEN
@@ -60,5 +60,22 @@ describe('admin session token', () => {
     expect(await verifySessionToken(undefined)).toBe(false)
     expect(await verifySessionToken('')).toBe(false)
     expect(await verifySessionToken('no-dot')).toBe(false)
+  })
+})
+
+describe('getTokenExpiryMs', () => {
+  it('reads the embedded expiry from a well-formed token', async () => {
+    const token = await createSessionToken()
+    const expiry = getTokenExpiryMs(token)
+    expect(expiry).not.toBeNull()
+    expect(expiry).toBeGreaterThan(Date.now())
+  })
+
+  it('returns null for missing/malformed input', () => {
+    expect(getTokenExpiryMs(undefined)).toBeNull()
+    expect(getTokenExpiryMs(null)).toBeNull()
+    expect(getTokenExpiryMs('')).toBeNull()
+    expect(getTokenExpiryMs('no-dot')).toBeNull()
+    expect(getTokenExpiryMs('notanumber.sig')).toBeNull()
   })
 })
