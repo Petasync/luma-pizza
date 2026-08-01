@@ -243,6 +243,27 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
+                {/* Rechtlich notwendige Hinweise direkt vor der Zahlung - gelten für
+                    alle drei Zahlarten gleichermaßen, deshalb hier vor der
+                    Methoden-Verzweigung statt in den einzelnen Payment-Komponenten. */}
+                <div className="text-xs text-charcoal-500 leading-relaxed space-y-2 pt-1">
+                  <p>
+                    Mit dem Absenden deiner Bestellung verarbeiten wir deine Kontakt- und
+                    Bestelldaten zur Abwicklung. Mehr dazu in unserer{' '}
+                    <Link href="/datenschutz" className="underline hover:text-gold-700">
+                      Datenschutzerklärung
+                    </Link>.
+                  </p>
+                  <p>
+                    Alle Preise sind Endpreise inklusive der gesetzlichen Mehrwertsteuer.
+                  </p>
+                  <p>
+                    Da es sich um frische, schnell verderbliche Speisen mit vereinbartem
+                    Liefer- bzw. Abholtermin handelt, besteht gemäß § 312g Abs. 2 Nr. 2 BGB
+                    kein gesetzliches Widerrufsrecht.
+                  </p>
+                </div>
+
                 <div className="pt-2">
                   {closed ? (
                     <div className="bg-charcoal-900/5 border border-charcoal-900/15 px-5 py-6 text-center">

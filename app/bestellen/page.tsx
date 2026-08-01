@@ -43,6 +43,9 @@ export default function BestellenPage() {
               Wähle aus über 60 hausgemachten Gerichten. Frisch zubereitet,
               schnell geliefert oder zur Abholung bereit.
             </p>
+            <p className="text-cream-100/50 text-xs mt-3">
+              Alle Preise sind Endpreise inklusive der gesetzlichen Mehrwertsteuer.
+            </p>
           </div>
         </section>
 
