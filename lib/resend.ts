@@ -328,25 +328,27 @@ async function sendeAlarm(betreff: string, zeilen: string[]) {
 }
 
 /**
- * Der Ernstfall: Stripe meldet eine erfolgreiche Zahlung, zu der es keine
- * Bestellung gibt. Genau das ist am 26.07.2026 unbemerkt passiert — ab jetzt
- * gibt es dafür sofort eine Mail mit allen Daten zum Nachtragen oder Erstatten.
+ * Der Ernstfall: Stripe oder PayPal meldet eine erfolgreiche Zahlung, zu der es
+ * keine Bestellung gibt. Genau das ist am 26.07.2026 unbemerkt passiert — ab
+ * jetzt gibt es dafür sofort eine Mail mit allen Daten zum Nachtragen oder
+ * Erstatten.
  */
 export async function sendeZahlungOhneBestellung(z: {
+  anbieter: 'Stripe' | 'PayPal'
   zahlungsId: string
   betragCent: number
   email: string | null
   zeitpunkt: Date
 }) {
   await sendeAlarm('🚨 Zahlung ohne Bestellung — bitte sofort prüfen', [
-    'Stripe hat eine erfolgreiche Zahlung gemeldet, zu der KEINE Bestellung in der Datenbank existiert.',
+    `${z.anbieter} hat eine erfolgreiche Zahlung gemeldet, zu der KEINE Bestellung in der Datenbank existiert.`,
     '',
     `Betrag:        ${formatEuro(z.betragCent / 100)}`,
     `Zahlungs-ID:   ${z.zahlungsId}`,
     `E-Mail:        ${z.email ?? 'unbekannt'}`,
     `Zeitpunkt:     ${z.zeitpunkt.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
     '',
-    'Bitte im Stripe-Dashboard nachsehen, den Kunden kontaktieren und die',
+    `Bitte im ${z.anbieter}-Dashboard nachsehen, den Kunden kontaktieren und die`,
     'Bestellung nachtragen oder das Geld erstatten.',
   ])
 }

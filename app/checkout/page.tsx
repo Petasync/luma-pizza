@@ -105,9 +105,27 @@ export default function CheckoutPage() {
   }
 
   /**
-   * Kartenzahlung, Schritt 2 von 2: dem Server melden, dass bezahlt wurde.
+   * PayPal, Schritt 1 von 2: Bestellung anlegen, BEVOR `actions.order.capture()`
+   * das Geld einzieht. Genau derselbe Ablauf wie bei Karte, nur mit der
+   * PayPal-Bestell-ID statt der Stripe-Payment-Intent-ID.
+   */
+  async function merkeBestellungVorPayPal(paypalOrderId: string): Promise<string> {
+    setError('')
+    const res = await fetch('/api/bestellung/vormerken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bestelldaten({ paypalOrderId })),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? 'Bestellung konnte nicht angelegt werden.')
+    return data.id as string
+  }
+
+  /**
+   * Schritt 2 von 2 (Karte UND PayPal): dem Server melden, dass bezahlt wurde.
    * Nur die Abkürzung für eine schnelle Bestätigungsseite — falls dieser Aufruf
-   * scheitert, erledigt der Stripe-Webhook dasselbe serverseitig.
+   * scheitert, erledigt der jeweilige Webhook (Stripe/PayPal) bzw. ersatzweise
+   * die nächtliche Nachtwache dasselbe serverseitig.
    */
   async function bestaetigeZahlung(orderId: string) {
     setIsSubmitting(true)
@@ -245,7 +263,8 @@ export default function CheckoutPage() {
                       {paymentMethod === 'paypal' && (
                         <PayPalButton
                           amount={total}
-                          onSuccess={orderId => createOrder({ paypalOrderId: orderId })}
+                          onBeforeConfirm={merkeBestellungVorPayPal}
+                          onSuccess={bestaetigeZahlung}
                           onError={msg => setError(msg)}
                         />
                       )}
