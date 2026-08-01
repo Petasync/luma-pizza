@@ -60,9 +60,11 @@ jest.mock('@/lib/supabase-server', () => ({
 
 const mockKundenMail = jest.fn()
 const mockRestaurantMail = jest.fn()
+const mockKorrekturAlarm = jest.fn()
 jest.mock('@/lib/resend', () => ({
   sendOrderConfirmationToCustomer: (...a: unknown[]) => mockKundenMail(...a),
   sendNewOrderToRestaurant: (...a: unknown[]) => mockRestaurantMail(...a),
+  sendeBezahlungKorrigiert: (...a: unknown[]) => mockKorrekturAlarm(...a),
 }))
 
 import { markiereAlsBezahlt } from '@/lib/bezahlung'
@@ -73,6 +75,7 @@ beforeEach(() => {
   ]
   mockKundenMail.mockReset().mockResolvedValue(undefined)
   mockRestaurantMail.mockReset().mockResolvedValue(undefined)
+  mockKorrekturAlarm.mockReset().mockResolvedValue(undefined)
 })
 
 describe('markiereAlsBezahlt', () => {
@@ -113,5 +116,47 @@ describe('markiereAlsBezahlt', () => {
     expect(r.ergebnis === 'neu' && r.mailFehler).toBeTruthy()
     expect(mockSpeicher.zeilen[0].payment_status).toBe('paid')
     expect(mockSpeicher.zeilen[0].benachrichtigt_am).toBeNull()
+  })
+
+  // Review-Fund: Ein bestätigter Zahlungseingang (z. B. ein verspätet
+  // eintreffender Webhook) muss eine zuvor fälschlich auf "failed" gesetzte
+  // Bestellung noch korrigieren können — sonst bleibt eine tatsächlich
+  // bezahlte Bestellung für immer "failed", ohne dass es je auffällt.
+  describe('Korrektur einer fälschlich "failed" gesetzten Bestellung', () => {
+    beforeEach(() => {
+      mockSpeicher.zeilen = [
+        { id: 'best-1', payment_status: 'failed', benachrichtigt_am: null, total_price: 51.5 },
+      ]
+    })
+
+    it('ein bestätigter Zahlungseingang korrigiert "failed" auf "bezahlt", verschickt Mails und meldet die Korrektur', async () => {
+      const r = await markiereAlsBezahlt('best-1')
+
+      expect(r.ergebnis).toBe('korrigiert')
+      expect(mockSpeicher.zeilen[0].payment_status).toBe('paid')
+      expect(mockKundenMail).toHaveBeenCalledTimes(1)
+      expect(mockRestaurantMail).toHaveBeenCalledTimes(1)
+      // Das MUSS ausdrücklich gemeldet werden — es bedeutet, dass vorher etwas
+      // schiefgelaufen ist (z. B. ein PayPal-/Stripe-API-Ausfall bei einer
+      // früheren Prüfung).
+      expect(mockKorrekturAlarm).toHaveBeenCalledTimes(1)
+    })
+
+    // Derselbe Webhook zweimal zugestellt (PayPal/Stripe garantieren keine
+    // Einmalzustellung) darf weiterhin keine zweite Bestellung/Mail/Meldung
+    // erzeugen — die Mehrfach-Absicherung muss über den Korrektur-Pfad hinweg
+    // erhalten bleiben.
+    it('derselbe Webhook zweimal: nur EINE Korrektur, EINE Mail, EIN Alarm — keine Bestellungsverdopplung', async () => {
+      const erster = await markiereAlsBezahlt('best-1')
+      const zweiter = await markiereAlsBezahlt('best-1')
+
+      expect(erster.ergebnis).toBe('korrigiert')
+      expect(zweiter.ergebnis).toBe('schon-bezahlt')
+      expect(mockSpeicher.zeilen).toHaveLength(1) // keine zweite Zeile in der DB
+      expect(mockSpeicher.zeilen[0].payment_status).toBe('paid')
+      expect(mockKundenMail).toHaveBeenCalledTimes(1)
+      expect(mockRestaurantMail).toHaveBeenCalledTimes(1)
+      expect(mockKorrekturAlarm).toHaveBeenCalledTimes(1)
+    })
   })
 })

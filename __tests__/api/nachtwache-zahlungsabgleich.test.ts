@@ -249,6 +249,33 @@ describe('GET /api/cron/nachtwache — Teil 4 (Vormerkungen älter als 24h)', ()
     expect(data.meldungen.some((m: string) => m.includes('vorerst nicht angefasst'))).toBe(true)
   })
 
+  it('schlägt die Prüfung bei PayPal selbst fehl (z. B. HTTP 500 von PayPal), bleibt die Bestellung unangetastet', async () => {
+    mockSpeicher.zeilen.push({
+      id: 'best-paypal-unklar',
+      payment_status: 'pending',
+      payment_method: 'paypal',
+      paypal_order_id: 'PAYPAL-UNKLAR',
+      total_price: 17,
+      benachrichtigt_am: null,
+      created_at: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(),
+    })
+    // Genau der kritische Review-Fund: eine HTTP-Fehlerantwort von PayPal
+    // (500/429/…) wirft jetzt in lib/paypal.ts (siehe __tests__/lib/paypal.test.ts),
+    // statt intern zu "false" = "nicht bezahlt" zu werden. Hier wird geprüft,
+    // dass die Nachtwache einen solchen Wurf korrekt als "unbekannt" behandelt
+    // und NICHT auf "failed" setzt.
+    mockVerifyPayPalOrder.mockRejectedValue(
+      new Error('PayPal-Abfrage für Bestellung PAYPAL-UNKLAR fehlgeschlagen: HTTP 500.'),
+    )
+
+    const res = await GET(req())
+    const data = await res.json()
+
+    expect(mockSpeicher.zeilen[0].payment_status).toBe('pending') // weder failed noch paid
+    expect(mockMarkiereAlsBezahlt).not.toHaveBeenCalled()
+    expect(data.meldungen.some((m: string) => m.includes('vorerst nicht angefasst'))).toBe(true)
+  })
+
   it('eine Vormerkung ohne Zahlungs-ID wird sicher auf failed gesetzt (kann nie bezahlt worden sein)', async () => {
     mockSpeicher.zeilen.push({
       id: 'best-ohne-id',
