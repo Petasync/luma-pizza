@@ -84,6 +84,7 @@ async function verarbeiteErfolg(intent: Stripe.PaymentIntent) {
     // statt dass es wie am 26.07. unbemerkt bleibt.
     console.error(`Zahlung ${intent.id} ohne zugehörige Bestellung!`)
     await sendeZahlungOhneBestellung({
+      anbieter: 'Stripe',
       zahlungsId: intent.id,
       betragCent: intent.amount,
       email: intent.receipt_email ?? null,
@@ -93,7 +94,7 @@ async function verarbeiteErfolg(intent: Stripe.PaymentIntent) {
   }
 
   const ergebnis = await markiereAlsBezahlt(orderId)
-  if (ergebnis.ergebnis === 'neu' && ergebnis.mailFehler) {
+  if ((ergebnis.ergebnis === 'neu' || ergebnis.ergebnis === 'korrigiert') && ergebnis.mailFehler) {
     console.error('Bestätigungsmail fehlgeschlagen:', ergebnis.mailFehler)
   }
 }

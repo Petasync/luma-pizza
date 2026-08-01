@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (vorhanden) {
       const ergebnis = await markiereAlsBezahlt(vorhanden.id as string)
-      if (ergebnis.ergebnis === 'neu' && ergebnis.mailFehler) {
+      if ((ergebnis.ergebnis === 'neu' || ergebnis.ergebnis === 'korrigiert') && ergebnis.mailFehler) {
         console.error('Bestätigungsmail fehlgeschlagen:', ergebnis.mailFehler)
       }
       return NextResponse.json({ id: vorhanden.id }, { status: 200 })
