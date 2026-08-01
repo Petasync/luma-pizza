@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { stripe } from '@/lib/stripe'
-import { verschickeBestaetigungen } from '@/lib/bezahlung'
+import { verifyPayPalOrder } from '@/lib/paypal'
+import { markiereAlsBezahlt, verschickeBestaetigungen } from '@/lib/bezahlung'
 import { sendeNachtwacheBericht } from '@/lib/resend'
 import { formatEuro } from '@/lib/business'
 import { Order } from '@/lib/types'
@@ -21,8 +22,13 @@ export const maxDuration = 60
  *     gehakt hat (`benachrichtigt_am` leer), bekommen ihre Mails nachträglich.
  *  3. **Abgleich mit Stripe** — jede erfolgreiche Zahlung der letzten 48 h muss
  *     eine bezahlte Bestellung haben. Fehlt eine, gibt es sofort eine Mail.
- *  4. **Aufräumen** — Vormerkungen, zu denen nie eine Zahlung kam, werden nach
- *     24 h auf "failed" gesetzt (nie gelöscht — Daten bleiben nachvollziehbar).
+ *  4. **Aufräumen** — Vormerkungen älter als 24 h werden NICHT blind auf
+ *     "failed" gesetzt: zuerst wird beim jeweiligen Zahlungsdienst (Stripe
+ *     oder PayPal) der echte Status geprüft. War doch bezahlt worden, wird die
+ *     Bestellung auf "bezahlt" nachgetragen und gemeldet statt fälschlich als
+ *     fehlgeschlagen abgestempelt — sonst wäre das genau der Fehler vom
+ *     26.07.2026, nur zeitversetzt. Schlägt die Prüfung selbst fehl (Netz,
+ *     API down), wird die Bestellung NICHT angefasst, sondern nur gemeldet.
  *
  * Gemeldet wird nur, wenn es etwas zu melden gibt. Keine Mail = alles in Ordnung.
  */
@@ -107,20 +113,88 @@ export async function GET(req: NextRequest) {
     meldungen.push(`Abgleich mit Stripe fehlgeschlagen: ${e instanceof Error ? e.message : e}`)
   }
 
-  // --- 4. Verwaiste Vormerkungen aufräumen -------------------------------
-  // Nur solche, die älter als 24 h sind — dann ist auch der letzte Stripe-Versuch
-  // längst durch. Es wird nie gelöscht, nur markiert.
+  // --- 4. Verwaiste Vormerkungen: erst prüfen, dann erst abstempeln --------
+  // Nur Vormerkungen, die älter als 24 h sind — dann ist auch der letzte
+  // Zahlungsversuch längst durch. WICHTIG: Vor dem Abstempeln wird beim
+  // jeweiligen Zahlungsdienst nachgefragt, ob nicht doch bezahlt wurde. Eine
+  // tatsächlich bezahlte Bestellung darf niemals als "failed" enden — das wäre
+  // wieder der Fehler vom 26.07.2026, nur mit einem Tag Verzögerung statt
+  // sofort. Es wird nie gelöscht, nur markiert.
   const vorEinemTag = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  const { data: aufgeraeumt } = await supabase
+  const { data: offeneVormerkungen } = await supabase
     .from('orders')
-    .update({ payment_status: 'failed' })
+    .select('id, payment_method, stripe_payment_intent_id, paypal_order_id, total_price')
     .eq('payment_status', 'pending')
     .neq('payment_method', 'cash')
     .lt('created_at', vorEinemTag)
-    .select('id')
 
-  if (aufgeraeumt && aufgeraeumt.length > 0) {
-    meldungen.push(`${aufgeraeumt.length} abgebrochene Zahlung(en) als "failed" abgelegt.`)
+  let abgestempelt = 0
+
+  for (const roh of offeneVormerkungen ?? []) {
+    const vormerkung = roh as Pick<
+      Order,
+      'id' | 'payment_method' | 'stripe_payment_intent_id' | 'paypal_order_id' | 'total_price'
+    >
+    const kennzeichen = vormerkung.id.slice(0, 8).toUpperCase()
+    const erwarteteCents = Math.round(Number(vormerkung.total_price) * 100)
+
+    // true = wirklich bezahlt, false = wirklich nicht bezahlt, null = die
+    // Prüfung selbst ist fehlgeschlagen (NICHT mit "nicht bezahlt" verwechseln).
+    let wirklichBezahlt: boolean | null
+
+    if (vormerkung.payment_method === 'card' && vormerkung.stripe_payment_intent_id) {
+      try {
+        const intent = await stripe.paymentIntents.retrieve(vormerkung.stripe_payment_intent_id)
+        wirklichBezahlt =
+          intent.status === 'succeeded' && intent.currency === 'eur' && intent.amount === erwarteteCents
+      } catch (e) {
+        wirklichBezahlt = null
+        meldungen.push(
+          `Prüfung bei Stripe für Bestellung ${kennzeichen} fehlgeschlagen — vorerst nicht angefasst: ` +
+            `${e instanceof Error ? e.message : e}`,
+        )
+      }
+    } else if (vormerkung.payment_method === 'paypal' && vormerkung.paypal_order_id) {
+      try {
+        wirklichBezahlt = await verifyPayPalOrder(vormerkung.paypal_order_id, erwarteteCents)
+      } catch (e) {
+        wirklichBezahlt = null
+        meldungen.push(
+          `Prüfung bei PayPal für Bestellung ${kennzeichen} fehlgeschlagen — vorerst nicht angefasst: ` +
+            `${e instanceof Error ? e.message : e}`,
+        )
+      }
+    } else {
+      // Keine Zahlungs-ID vorhanden — kann nie bezahlt worden sein.
+      wirklichBezahlt = false
+    }
+
+    if (wirklichBezahlt === null) {
+      continue // Prüfung selbst gescheitert: nicht anfassen, nächste Nacht erneut versuchen.
+    }
+
+    if (wirklichBezahlt) {
+      const ergebnis = await markiereAlsBezahlt(vormerkung.id)
+      if (ergebnis.ergebnis === 'neu') {
+        meldungen.push(
+          `🚨 Bestellung ${kennzeichen} war tatsächlich bezahlt, stand aber noch als "pending" — ` +
+            'jetzt auf "bezahlt" nachgetragen und Mails verschickt.',
+        )
+      }
+      // 'schon-bezahlt' kann hier praktisch nicht vorkommen (wir haben die Zeile
+      // gerade erst als "pending" gelesen) — dann ist ohnehin nichts mehr zu tun.
+    } else {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: 'failed' })
+        .eq('id', vormerkung.id)
+        .eq('payment_status', 'pending')
+      if (!error) abgestempelt++
+    }
+  }
+
+  if (abgestempelt > 0) {
+    meldungen.push(`${abgestempelt} abgebrochene Zahlung(en) als "failed" abgelegt.`)
   }
 
   // --- Bericht — nur bei Auffälligkeiten ---------------------------------
