@@ -93,3 +93,42 @@ export function getScheduleRows(): ScheduleRow[] {
     return { day: DAY_LABELS[d], hours: s ? `${s.open} – ${s.close}` : 'Geschlossen' }
   })
 }
+
+// schema.org erwartet die englischen Wochentagsnamen für dayOfWeek.
+const SCHEMA_DAY_NAMES: Record<number, string> = {
+  0: 'Sunday',
+  1: 'Monday',
+  2: 'Tuesday',
+  3: 'Wednesday',
+  4: 'Thursday',
+  5: 'Friday',
+  6: 'Saturday',
+}
+
+export interface OpeningHoursSpecification {
+  '@type': 'OpeningHoursSpecification'
+  dayOfWeek: string
+  opens: string
+  closes: string
+}
+
+/**
+ * Liefert die Öffnungszeiten im schema.org-Format für das Restaurant-JSON-LD —
+ * aus derselben SCHEDULE-Quelle wie die sichtbare Tabelle (getScheduleRows()),
+ * damit sich nie zwei unterschiedliche Wahrheiten auseinanderentwickeln
+ * können. Geschlossene Tage (SCHEDULE[d] === null) werden ausgelassen.
+ */
+export function getOpeningHoursSchema(): OpeningHoursSpecification[] {
+  const result: OpeningHoursSpecification[] = []
+  for (let d = 0; d <= 6; d++) {
+    const s = SCHEDULE[d]
+    if (!s) continue
+    result.push({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: SCHEMA_DAY_NAMES[d],
+      opens: s.open,
+      closes: s.close,
+    })
+  }
+  return result
+}

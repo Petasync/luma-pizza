@@ -6,6 +6,7 @@ import './globals.css'
 import { CartProvider } from '@/components/cart/cart-context'
 import MobileCart from '@/components/cart/mobile-cart'
 import Footer from '@/components/footer'
+import { getOpeningHoursSchema } from '@/lib/opening-hours'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,7 +24,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.luma-pizza.de'),
-  title: 'Luma Pizza — Authentisch italienisch, frisch zubereitet',
+  title: 'Luma Pizza Dietenhofen — Authentisch italienisch, frisch zubereitet',
   description: 'Luma Pizza in Dietenhofen. Hausgemachte Pizza, Burger, Pasta und mehr. Direkt online bestellen, abholen oder liefern lassen.',
   keywords: ['Pizza Dietenhofen', 'Pizza bestellen', 'Pizza Lieferservice', 'Pizzeria Dietenhofen', 'Luma Pizza', 'Pizza liefern lassen'],
   alternates: { canonical: '/' },
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'de_DE',
     siteName: 'Luma Pizza',
-    title: 'Luma Pizza — Authentisch italienisch, frisch zubereitet',
+    title: 'Luma Pizza Dietenhofen — Authentisch italienisch, frisch zubereitet',
     description: 'Hausgemachte Pizza, Burger und Pasta aus Dietenhofen. Jetzt online bestellen — zum Abholen oder Liefern.',
     url: 'https://www.luma-pizza.de',
   },
@@ -43,7 +44,10 @@ export const viewport: Viewport = {
 }
 
 // LocalBusiness structured data — helps Luma Pizza appear in Google's local
-// results / maps. openingHours can be added here once confirmed.
+// results / maps. Öffnungszeiten kommen aus lib/opening-hours.ts (dieselbe
+// Quelle wie die sichtbare Tabelle im Kontaktbereich), die Koordinaten aus dem
+// OSM-Embed auf der Startseite (app/page.tsx) — beides bereits an anderer
+// Stelle im Code verifiziert, hier nur wiederverwendet statt neu erfunden.
 const restaurantJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Restaurant',
@@ -56,6 +60,12 @@ const restaurantJsonLd = {
     addressLocality: 'Dietenhofen',
     addressCountry: 'DE',
   },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 49.3970650,
+    longitude: 10.6887029,
+  },
+  openingHoursSpecification: getOpeningHoursSchema(),
   url: 'https://www.luma-pizza.de',
   email: 'info@luma-pizza.de',
   telephone: '+4915124882899',

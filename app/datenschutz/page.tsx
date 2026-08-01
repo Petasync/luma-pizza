@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Navbar from '@/components/navbar'
+
+export const metadata: Metadata = {
+  title: 'Datenschutz — Luma Pizza Dietenhofen',
+  description: 'Datenschutzerklärung von Luma Pizza in Dietenhofen: welche Daten bei einer Bestellung erhoben werden und wie sie verarbeitet werden (DSGVO).',
+  alternates: { canonical: '/datenschutz' },
+}
 
 export default function DatenschutzPage() {
   return (

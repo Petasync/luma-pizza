@@ -1,4 +1,4 @@
-import { getOpeningStatus, isOpen, getScheduleRows } from '@/lib/opening-hours'
+import { getOpeningStatus, isOpen, getScheduleRows, getOpeningHoursSchema } from '@/lib/opening-hours'
 
 // Helper: build a Date that, when formatted in Europe/Berlin, gives the desired
 // local wall-clock time. We do this by trying CET (+01:00) and DST (+02:00) and
@@ -71,6 +71,22 @@ describe('opening-hours', () => {
     ])
     for (const row of rows) {
       expect(row.hours).toBe('15:00 – 24:00')
+    }
+  })
+
+  // LP-11: Restaurant-JSON-LD (app/layout.tsx) braucht openingHoursSpecification,
+  // damit Google "geöffnet/geschlossen" korrekt anzeigen kann. Muss dieselbe
+  // SCHEDULE-Quelle nutzen wie die sichtbare Tabelle — keine eigene Wahrheit.
+  it('opening hours schema covers all 7 days with schema.org day names', () => {
+    const schema = getOpeningHoursSchema()
+    expect(schema).toHaveLength(7)
+    expect(schema.map(s => s.dayOfWeek)).toEqual([
+      'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+    ])
+    for (const entry of schema) {
+      expect(entry['@type']).toBe('OpeningHoursSpecification')
+      expect(entry.opens).toBe('15:00')
+      expect(entry.closes).toBe('24:00')
     }
   })
 })
