@@ -111,6 +111,20 @@ export async function createDeviceCookie(): Promise<string> {
   return `${payload}.${await hmac(payload, getDeviceSecret())}`
 }
 
+/**
+ * Liest den eingebetteten Ablaufzeitpunkt (ms seit Epoch) aus einem Token der
+ * Form `<Ablauf>.<Signatur>`, OHNE die Signatur zu prüfen. Nur zur Anzeige
+ * "läuft in X Tagen ab" gedacht — der Aufrufer muss die Echtheit vorher schon
+ * per verifySessionToken()/verifyDeviceCookie() festgestellt haben.
+ */
+export function getTokenExpiryMs(token: string | undefined | null): number | null {
+  if (!token) return null
+  const dot = token.indexOf('.')
+  if (dot <= 0) return null
+  const expiry = Number(token.slice(0, dot))
+  return Number.isFinite(expiry) ? expiry : null
+}
+
 /** Prüft das Geräte-Cookie gegen den aktuellen DASHBOARD_DEVICE_TOKEN. */
 export async function verifyDeviceCookie(token: string | undefined | null): Promise<boolean> {
   if (!token) return false

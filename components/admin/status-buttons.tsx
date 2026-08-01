@@ -34,11 +34,17 @@ interface Props {
 
 export default function StatusButtons({ orderId, currentStatus, onUpdate, compact = false }: Props) {
   const [loading, setLoading] = useState(false)
+  // War vorher stumm: schlug die Aktualisierung fehl (z. B. abgelaufene
+  // Sitzung → 401), verschwand einfach die Ladeanzeige und niemand erfuhr,
+  // dass der Statuswechsel NICHT gespeichert wurde. Derselbe Fehlertyp wie
+  // beim Terminal-Ausfall vom 26.07., nur beim Schreiben statt beim Lesen.
+  const [fehler, setFehler] = useState(false)
   const next = NEXT_STATUS[currentStatus]
 
   async function advance() {
     if (!next) return
     setLoading(true)
+    setFehler(false)
     try {
       const res = await fetch(`/api/orders/${orderId}`, {
         method: 'PATCH',
@@ -46,6 +52,9 @@ export default function StatusButtons({ orderId, currentStatus, onUpdate, compac
         body: JSON.stringify({ status: next }),
       })
       if (res.ok) onUpdate(next)
+      else setFehler(true)
+    } catch {
+      setFehler(true)
     } finally {
       setLoading(false)
     }
@@ -64,6 +73,11 @@ export default function StatusButtons({ orderId, currentStatus, onUpdate, compac
         >
           {loading ? '…' : `→ ${STATUS_LABELS[next]}`}
         </button>
+      )}
+      {fehler && (
+        <span role="alert" className="text-[10px] text-wine-600 font-medium">
+          Nicht gespeichert — bitte nochmal tippen.
+        </span>
       )}
     </div>
   )

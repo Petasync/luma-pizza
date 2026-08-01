@@ -19,6 +19,13 @@ const FILTER_LABELS: Record<Filter, string> = {
 }
 
 const POLL_INTERVAL_MS = 10_000
+// Vorwarnung vor Ablauf der Geräte-Anmeldung: reicht, einmal pro Stunde zu
+// prüfen (die Geräte-Anmeldung ist auf 1 Jahr gültig, das ändert sich nicht
+// schnell) — anders als das 10-Sekunden-Polling der Bestellungen.
+const SESSION_STATUS_INTERVAL_MS = 60 * 60 * 1000
+// Ab wie vielen Tagen vor Ablauf gewarnt wird — genug Vorlauf, damit jemand
+// in Ruhe den Kiosk-Laptop einmal neu starten kann.
+const DEVICE_WARNING_THRESHOLD_DAYS = 14
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -33,6 +40,32 @@ export default function AdminDashboard() {
    * anhaltender Fehler jetzt groß angezeigt UND vertont.
    */
   const [stoerung, setStoerung] = useState<string | null>(null)
+  // Vorwarnung vor Ablauf der Geräte-Anmeldung (siehe /api/admin/session-status) —
+  // null = unbekannt/nicht betroffen (kein Kiosk-Gerät angemeldet).
+  const [deviceExpiresInDays, setDeviceExpiresInDays] = useState<number | null>(null)
+
+  useEffect(() => {
+    let active = true
+
+    async function pruefeAblauf() {
+      try {
+        const res = await fetch('/api/admin/session-status', { cache: 'no-store' })
+        if (!res.ok || !active) return
+        const { deviceExpiresInDays: tage } = (await res.json()) as { deviceExpiresInDays: number | null }
+        if (active) setDeviceExpiresInDays(tage)
+      } catch {
+        /* Kein Grund zur Sorge machen, wenn diese Nebenprüfung selbst scheitert —
+           das Haupt-Polling unten meldet echte Ausfälle ohnehin lautstark. */
+      }
+    }
+
+    pruefeAblauf()
+    const interval = setInterval(pruefeAblauf, SESSION_STATUS_INTERVAL_MS)
+    return () => {
+      active = false
+      clearInterval(interval)
+    }
+  }, [])
 
   useEffect(() => {
     // Orders carry customer PII, so they're behind RLS — we poll the
@@ -133,6 +166,23 @@ export default function AdminDashboard() {
             <p className="text-sm mt-3 text-cream-100/90">
               Solange dieser Balken zu sehen ist, werden <strong>keine neuen Bestellungen angezeigt</strong>.
               Bitte telefonisch erreichbar bleiben und Phillip Bescheid geben.
+            </p>
+          </div>
+        )}
+
+        {/* Vorwarnung, BEVOR die Geräte-Anmeldung abläuft — bewusst ruhiger
+            gestaltet als die rote Störung oben, damit man beides klar
+            auseinanderhalten kann. */}
+        {!stoerung && deviceExpiresInDays !== null && deviceExpiresInDays <= DEVICE_WARNING_THRESHOLD_DAYS && (
+          <div role="status" className="mb-6 bg-gold-500/20 border-2 border-gold-600 text-charcoal-900 px-6 py-4">
+            <p className="text-sm font-semibold">
+              ⚠ Hinweis — Anmeldung läuft bald ab
+            </p>
+            <p className="text-sm mt-1">
+              {deviceExpiresInDays <= 0
+                ? 'Die Geräte-Anmeldung dieses Terminals läuft heute ab.'
+                : `Die Geräte-Anmeldung dieses Terminals läuft in ${deviceExpiresInDays} Tagen ab.`}{' '}
+              Bitte den Laptop bei Gelegenheit einmal neu starten — danach verlängert sie sich automatisch um ein weiteres Jahr.
             </p>
           </div>
         )}
