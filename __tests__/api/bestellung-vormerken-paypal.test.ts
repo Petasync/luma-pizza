@@ -65,7 +65,9 @@ class MockAbfrage {
         resolve({ data: null, error: { code: '23505', message: 'duplicate key value violates unique constraint' } })
         return
       }
-      const neu: Zeile = { id: `best-${mockSpeicher.naechsteId++}`, ...werte }
+      // Die Route setzt payment_status immer mit; TypeScript sieht das der
+      // generischen Record-Signatur von `werte` aber nicht an.
+      const neu = { id: `best-${mockSpeicher.naechsteId++}`, ...werte } as Zeile
       mockSpeicher.zeilen.push(neu)
       resolve({ data: { id: neu.id }, error: null })
       return

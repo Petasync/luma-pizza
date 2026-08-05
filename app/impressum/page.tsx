@@ -3,7 +3,7 @@ import Navbar from '@/components/navbar'
 
 export const metadata: Metadata = {
   title: 'Impressum — Luma Pizza Dietenhofen',
-  description: 'Impressum von Luma Pizza in Dietenhofen: Anbieterkennzeichnung, Kontaktdaten und rechtliche Angaben gemäß § 5 TMG.',
+  description: 'Impressum von Luma Pizza in Dietenhofen: Anbieterkennzeichnung, Kontaktdaten und rechtliche Angaben gemäß § 5 DDG.',
   alternates: { canonical: '/impressum' },
 }
 
@@ -43,21 +43,22 @@ export default function ImpressumPage() {
             </p>
           </section>
 
+          <section>
+            <p className="eyebrow mb-3">Aufsichtsbehörde</p>
+            <p className="text-charcoal-700 leading-relaxed">
+              Landratsamt Ansbach<br />
+              Crailsheimstraße 1, 91522 Ansbach
+            </p>
+            <p className="text-charcoal-600 text-sm mt-2">
+              Zuständig für die Erlaubnis nach dem Gaststättengesetz.
+            </p>
+          </section>
+
           <section className="pt-8 border-t border-charcoal-900/10">
-            <p className="eyebrow mb-3">Online-Streitbeilegung</p>
+            <p className="eyebrow mb-3">Verbraucherstreitbeilegung</p>
             <p className="text-charcoal-700 leading-relaxed text-sm">
-              Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS)
-              bereit:{' '}
-              <a
-                href="https://ec.europa.eu/consumers/odr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gold-600 hover:underline"
-              >
-                https://ec.europa.eu/consumers/odr
-              </a>
-              . Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer
-              Verbraucherschlichtungsstelle teilzunehmen.
+              Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor
+              einer Verbraucherschlichtungsstelle teilzunehmen (§ 36 VSBG).
             </p>
           </section>
 

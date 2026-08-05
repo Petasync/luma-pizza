@@ -94,10 +94,14 @@ export default function DatenschutzPage() {
           <section className="pt-8 border-t border-charcoal-900/10">
             <p className="eyebrow mb-3">Kartendarstellung</p>
             <p className="text-charcoal-700 leading-relaxed">
-              Auf der Startseite ist eine Karte von OpenStreetMap (OpenStreetMap Foundation,
-              UK) eingebunden. Beim Aufruf der Seite stellt Ihr Browser eine Verbindung zu
-              den OpenStreetMap-Servern her und übermittelt dabei Ihre IP-Adresse. Details
-              siehe <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline">Datenschutzerklärung von OpenStreetMap</a>.
+              Auf der Startseite können Sie eine Karte von OpenStreetMap (OpenStreetMap
+              Foundation, UK) einblenden. Die Karte wird <strong>erst nach einem Klick auf
+              „Karte laden"</strong> geladen — vorher findet keine Verbindung zu
+              OpenStreetMap statt. Mit dem Klick übermittelt Ihr Browser Ihre IP-Adresse an
+              die OpenStreetMap-Server. Rechtsgrundlage ist Ihre Einwilligung
+              (Art. 6 Abs. 1 lit. a DSGVO), die Sie durch das Nichtladen der Karte jederzeit
+              verweigern können. Details siehe{' '}
+              <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:underline">Datenschutzerklärung von OpenStreetMap</a>.
             </p>
           </section>
 
@@ -123,10 +127,16 @@ export default function DatenschutzPage() {
             <p className="eyebrow mb-3">Ihre Rechte</p>
             <p className="text-charcoal-700 leading-relaxed">
               Sie haben das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16),
-              Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und
-              Datenübertragbarkeit (Art. 20 DSGVO) sowie das Recht, sich bei einer
-              Aufsichtsbehörde zu beschweren. Anfragen richten Sie bitte an{' '}
+              Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18),
+              Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf
+              Grundlage berechtigter Interessen (Art. 21 DSGVO). Anfragen richten Sie
+              bitte an{' '}
               <a href="mailto:info@luma-pizza.de" className="text-gold-600 hover:underline">info@luma-pizza.de</a>.
+            </p>
+            <p className="text-charcoal-700 leading-relaxed mt-4">
+              Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren.
+              Für uns zuständig ist das Bayerische Landesamt für Datenschutzaufsicht,
+              Promenade 18, 91522 Ansbach.
             </p>
           </section>
         </article>

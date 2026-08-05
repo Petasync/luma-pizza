@@ -6,6 +6,7 @@ import CategoryTabs from '@/components/menu/category-tabs'
 import MenuGrid from '@/components/menu/menu-grid'
 import CartSidebar from '@/components/cart/cart-sidebar'
 import ClosedBanner from '@/components/closed-banner'
+import AllergenHinweis from '@/components/menu/allergen-hinweis'
 import { MENU_CATEGORIES, menuJsonLd } from '@/lib/menu'
 
 const MENU_JSON_LD = JSON.stringify(menuJsonLd())
@@ -62,6 +63,7 @@ export default function BestellenPage() {
         {/* Content — pb auf Mobile, damit Inhalt nicht hinter dem schwebenden Warenkorb-Button verschwindet */}
         <section className="container-wide px-4 sm:px-6 lg:px-12 pt-8 pb-28 lg:pb-12">
           <ClosedBanner className="mb-6" />
+          <AllergenHinweis className="mb-6" />
           <div className="flex flex-col lg:flex-row gap-10 items-start">
             <div className="flex-1 min-w-0">
               <MenuGrid category={activeCategory} />

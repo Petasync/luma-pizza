@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import OpeningStatusBadge from '@/components/opening-status'
 import { getScheduleRows } from '@/lib/opening-hours'
+import { DELIVERY_AREAS } from '@/lib/postal-codes'
 
 export default function Footer() {
   const rows = getScheduleRows()
@@ -46,9 +47,10 @@ export default function Footer() {
           <div>
             <p className="text-xs uppercase tracking-widest text-gold-400 mb-4">Mehr</p>
             <ul className="space-y-2 text-sm text-cream-100/80">
-              <li><Link href="/bestellen" className="hover:text-gold-400">Speisekarte</Link></li>
+              <li><Link href="/speisekarte" className="hover:text-gold-400">Speisekarte</Link></li>
+              <li><Link href="/bestellen" className="hover:text-gold-400">Online bestellen</Link></li>
+              <li><Link href="/liefergebiet" className="hover:text-gold-400">Liefergebiet &amp; Fragen</Link></li>
               <li><Link href="/#story" className="hover:text-gold-400">Über uns</Link></li>
-              <li><Link href="/#galerie" className="hover:text-gold-400">Galerie</Link></li>
               <li><Link href="/impressum" className="hover:text-gold-400">Impressum</Link></li>
               <li><Link href="/datenschutz" className="hover:text-gold-400">Datenschutz</Link></li>
             </ul>
@@ -71,7 +73,13 @@ export default function Footer() {
           <div>
             <p className="text-xs uppercase tracking-widest text-gold-400 mb-4">Lieferkosten</p>
             <p className="text-2xl font-serif text-gold-400">Gratis</p>
-            <p className="text-xs text-cream-100/60 mt-1">In unserem gesamten Liefergebiet.</p>
+            <p className="text-xs text-cream-100/60 mt-1 leading-relaxed">
+              Wir liefern nach {DELIVERY_AREAS.map(a => a.name).join(', ')} —{' '}
+              <Link href="/liefergebiet" className="underline underline-offset-2 hover:text-gold-400">
+                Details zum Liefergebiet
+              </Link>
+              .
+            </p>
           </div>
         </div>
 
