@@ -61,7 +61,7 @@ const FAQ: { frage: string; antwort: string }[] = [
   },
   {
     frage: 'Wann habt ihr geöffnet? Gibt es einen Ruhetag?',
-    antwort: `Wir liefern täglich von ${getScheduleRows()[0].hours} Uhr — auch sonntags. Einen Ruhetag gibt es nicht.`,
+    antwort: `Wir liefern täglich von ${getScheduleRows('delivery')[0].hours} Uhr — auch sonntags. Einen Ruhetag gibt es nicht. Abholen kannst du schon ab ${getScheduleRows('pickup')[0].hours.split(' – ')[0]} Uhr.`,
   },
   {
     frage: 'Wie kann ich bezahlen?',

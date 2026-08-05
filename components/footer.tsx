@@ -5,7 +5,8 @@ import { getScheduleRows } from '@/lib/opening-hours'
 import { DELIVERY_AREAS } from '@/lib/postal-codes'
 
 export default function Footer() {
-  const rows = getScheduleRows()
+  const rows = getScheduleRows('delivery')
+  const abholzeit = getScheduleRows('pickup')[0].hours
   return (
     <footer className="bg-charcoal-900 text-cream-100 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-16">
@@ -69,6 +70,9 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
+            <p className="text-xs text-cream-100/60 mt-3">
+              Abholung täglich ab <span className="tabular-nums">{abholzeit.split(' – ')[0]}</span> Uhr.
+            </p>
           </div>
           <div>
             <p className="text-xs uppercase tracking-widest text-gold-400 mb-4">Lieferkosten</p>

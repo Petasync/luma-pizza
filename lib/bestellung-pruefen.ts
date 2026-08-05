@@ -2,7 +2,7 @@ import { CreateOrderPayload } from './types'
 import { priceCart, PricedCart, PricingError } from './pricing'
 import { isDeliverable } from './postal-codes'
 import { isOpen, getOpeningStatus } from './opening-hours'
-import { getMinOrderForPostalCode } from './business'
+import { getMinOrderForPostalCode, PAYPAL_AKTIV } from './business'
 
 /**
  * Alle Regeln, die erfüllt sein müssen, BEVOR Geld fließt.
@@ -21,11 +21,25 @@ export interface Pruefergebnis {
 }
 
 export function pruefeBestellung(body: CreateOrderPayload, jetzt: Date = new Date()): Pruefergebnis {
-  // --- Öffnungszeiten ---
-  if (!isOpen(jetzt)) {
-    const status = getOpeningStatus(jetzt)
-    const next = status.open ? '' : ` Wir öffnen ${status.nextOpenLabel} um ${status.nextOpenTime} Uhr.`
-    return { fehler: { nachricht: `Wir nehmen aktuell keine Bestellungen entgegen.${next}`, status: 503 } }
+  // --- Öffnungszeiten (Abholung ab 11:00, Lieferung erst ab 17:00) ---
+  if (!isOpen(jetzt, body.type)) {
+    const status = getOpeningStatus(jetzt, body.type)
+    const wann = status.open ? '' : ` ${status.nextOpenLabel} ab ${status.nextOpenTime} Uhr.`
+    if (body.type === 'delivery') {
+      // Mittags läuft die Abholung längst — dann ist ein blankes Nein die
+      // schlechtere Auskunft als der Hinweis darauf.
+      const abholbar = isOpen(jetzt, 'pickup') ? ' Abholen kannst du jetzt schon.' : ''
+      return { fehler: { nachricht: `Wir liefern gerade nicht.${wann}${abholbar}`, status: 503 } }
+    }
+    return { fehler: { nachricht: `Wir nehmen aktuell keine Abholbestellungen entgegen.${wann}`, status: 503 } }
+  }
+
+  // --- Zahlart ---
+  // Der ausgeblendete Knopf an der Kasse hält nur den Browser ab; ein von Hand
+  // gebauter Request käme sonst weiterhin durch und legte eine PayPal-Bestellung
+  // an, die niemand mehr bezahlen kann.
+  if (body.payment_method === 'paypal' && !PAYPAL_AKTIV) {
+    return { fehler: { nachricht: 'PayPal steht derzeit nicht zur Verfügung.', status: 400 } }
   }
 
   // --- Pflichtfelder ---

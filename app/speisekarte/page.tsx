@@ -142,6 +142,7 @@ export default function SpeisekartePage() {
               <div>
                 <dt className="text-xs uppercase tracking-widest text-gold-600 mb-1">Abholung</dt>
                 <dd className="text-charcoal-700">
+                  Täglich ab {getScheduleRows('pickup')[0].hours.split(' – ')[0]} Uhr,{' '}
                   {formatEta(PICKUP_ETA_MINUTES)}, ohne Mindestbestellwert
                 </dd>
               </div>
@@ -155,7 +156,7 @@ export default function SpeisekartePage() {
               <div>
                 <dt className="text-xs uppercase tracking-widest text-gold-600 mb-1">Wir liefern</dt>
                 <dd className="text-charcoal-700">
-                  {getScheduleRows()[0].hours} Uhr, täglich —{' '}
+                  {getScheduleRows('delivery')[0].hours} Uhr, täglich —{' '}
                   <Link href="/liefergebiet" className="text-gold-600 hover:underline">
                     ins gesamte Liefergebiet
                   </Link>

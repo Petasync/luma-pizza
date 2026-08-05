@@ -14,6 +14,7 @@ import { OrderType, PaymentMethod } from '@/lib/types'
 import {
   DELIVERY_ETA_MINUTES,
   PICKUP_ETA_MINUTES,
+  PAYPAL_AKTIV,
   getMinOrderForPostalCode,
   formatEta,
 } from '@/lib/business'
@@ -34,7 +35,9 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const isOpen = useIsOpen()
+  // Typabhängig: um 12:00 ist Abholung möglich, Lieferung noch nicht.
+  const isOpen = useIsOpen(orderType)
+  const abholungMoeglich = useIsOpen('pickup')
   // null = noch nicht festgestellt; behandeln wie "offen", damit der Button
   // beim Server-Render nicht fälschlich deaktiviert wirkt.
   const closed = isOpen === false
@@ -223,10 +226,10 @@ export default function CheckoutPage() {
                   <h2 className="font-serif text-2xl text-charcoal-900 mb-5">Zahlungsmethode</h2>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className={`grid gap-2 ${PAYPAL_AKTIV ? 'grid-cols-3' : 'grid-cols-2'}`}>
                   {([
                     { m: 'card' as const, label: 'Karte / Klarna' },
-                    { m: 'paypal' as const, label: 'PayPal' },
+                    ...(PAYPAL_AKTIV ? [{ m: 'paypal' as const, label: 'PayPal' }] : []),
                     { m: 'cash' as const, label: 'Bar' },
                   ]).map(({ m, label }) => (
                     <button
@@ -268,8 +271,16 @@ export default function CheckoutPage() {
                   {closed ? (
                     <div className="bg-charcoal-900/5 border border-charcoal-900/15 px-5 py-6 text-center">
                       <p className="text-sm text-charcoal-700">
-                        Bestellungen sind aktuell außerhalb unserer Lieferzeiten nicht möglich.
+                        {orderType === 'delivery'
+                          ? 'Zu dieser Uhrzeit liefern wir nicht.'
+                          : 'Bestellungen sind außerhalb unserer Öffnungszeiten nicht möglich.'}
                       </p>
+                      {orderType === 'delivery' && abholungMoeglich && (
+                        <p className="text-sm text-charcoal-700 mt-2">
+                          Abholen ist aber schon möglich — dafür oben auf{' '}
+                          <span className="font-medium">Abholung</span> wechseln.
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <>

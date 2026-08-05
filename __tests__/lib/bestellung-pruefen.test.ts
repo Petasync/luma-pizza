@@ -1,10 +1,11 @@
 import { pruefeBestellung } from '@/lib/bestellung-pruefen'
 import { CreateOrderPayload } from '@/lib/types'
 
-// Öffnungszeiten laut lib/opening-hours.ts: täglich 15:00–24:00 Berliner Zeit.
-// 2026-05-18 ist ein Montag.
-const GEOEFFNET = new Date('2026-05-18T16:00:00+02:00')
-const GESCHLOSSEN = new Date('2026-05-18T11:00:00+02:00')
+// Öffnungszeiten laut lib/opening-hours.ts (Berliner Zeit): Abholung täglich
+// 11:00–23:00, Lieferung 17:00–23:00. 2026-05-18 ist ein Montag.
+const GEOEFFNET = new Date('2026-05-18T18:00:00+02:00') // beides möglich
+const GESCHLOSSEN = new Date('2026-05-18T10:00:00+02:00') // noch gar nichts
+const NUR_ABHOLUNG = new Date('2026-05-18T12:00:00+02:00') // Küche offen, Lieferung nicht
 
 // pizza-margherita: 33 cm = 10,50 € / 45 cm = 17,00 €
 function payload(over: Partial<CreateOrderPayload> = {}): CreateOrderPayload {
@@ -33,7 +34,32 @@ describe('pruefeBestellung', () => {
   it('lehnt außerhalb der Öffnungszeiten mit 503 ab', () => {
     const { fehler } = pruefeBestellung(payload(), GESCHLOSSEN)
     expect(fehler?.status).toBe(503)
-    expect(fehler?.nachricht).toMatch(/keine Bestellungen/i)
+    expect(fehler?.nachricht).toMatch(/keine Abholbestellungen/i)
+  })
+
+  // Abholung und Lieferung haben getrennte Fenster. Vor 17:00 darf eine
+  // Lieferung nicht durchgehen, obwohl die Küche längst offen ist — und
+  // umgekehrt darf die Abholung dann nicht mit abgewiesen werden.
+  it('lehnt mittags eine Lieferung ab, lässt die Abholung aber zu', () => {
+    const lieferung = pruefeBestellung(
+      payload({ type: 'delivery', delivery_address: 'Teststr. 1', postal_code: '90599' }),
+      NUR_ABHOLUNG,
+    )
+    expect(lieferung.fehler?.status).toBe(503)
+    expect(lieferung.fehler?.nachricht).toMatch(/liefern gerade nicht/i)
+    // Der Kunde soll erfahren, dass Abholen schon geht.
+    expect(lieferung.fehler?.nachricht).toMatch(/Abholen kannst du jetzt schon/i)
+
+    const abholung = pruefeBestellung(payload(), NUR_ABHOLUNG)
+    expect(abholung.fehler).toBeUndefined()
+  })
+
+  // PayPal ist seit 05.08.2026 abgeschaltet (business.ts PAYPAL_AKTIV). Der
+  // Knopf ist an der Kasse weg — die Ablehnung muss aber serverseitig greifen.
+  it('lehnt eine PayPal-Bestellung ab, solange PayPal abgeschaltet ist', () => {
+    const { fehler } = pruefeBestellung(payload({ payment_method: 'paypal' }), GEOEFFNET)
+    expect(fehler?.status).toBe(400)
+    expect(fehler?.nachricht).toMatch(/PayPal/i)
   })
 
   it('verlangt vollständige Kontaktdaten', () => {

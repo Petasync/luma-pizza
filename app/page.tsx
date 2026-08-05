@@ -333,13 +333,17 @@ export default function HomePage() {
                   <OpeningStatusBadge />
                 </div>
                 <ul className="text-charcoal-800 space-y-1">
-                  {getScheduleRows().map(row => (
+                  {getScheduleRows('delivery').map(row => (
                     <li key={row.day} className="flex justify-between max-w-xs">
                       <span>{row.day}</span>
                       <span className="tabular-nums">{row.hours}</span>
                     </li>
                   ))}
                 </ul>
+                <p className="text-xs text-charcoal-600 mt-2 max-w-xs">
+                  Abholung täglich ab{' '}
+                  <span className="tabular-nums">{getScheduleRows('pickup')[0].hours.split(' – ')[0]}</span> Uhr.
+                </p>
                 <p className="text-xs text-gold-600 mt-3 max-w-xs">
                   Lieferung in unser gesamtes Gebiet — <span className="font-medium">gratis</span>.{' '}
                   <Link href="/liefergebiet" className="underline underline-offset-2 hover:text-gold-700">

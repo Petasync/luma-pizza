@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { getOpeningStatus, type OpeningStatus } from '@/lib/opening-hours'
+import type { OrderType } from '@/lib/types'
 
 interface Props {
   className?: string
@@ -11,15 +12,18 @@ interface Props {
 /**
  * Hook für die Bestell-Komponenten: liefert null bis nach dem ersten Mount
  * (vermeidet Hydration-Mismatch), danach true/false und aktualisiert minütlich.
+ *
+ * `type` mitgeben, wo es um eine konkrete Bestellung geht — Lieferung startet
+ * sechs Stunden später als Abholung, ohne den Typ wäre die Antwort zu großzügig.
  */
-export function useIsOpen(): boolean | null {
+export function useIsOpen(type?: OrderType): boolean | null {
   const [open, setOpen] = useState<boolean | null>(null)
   useEffect(() => {
-    const update = () => setOpen(getOpeningStatus().open)
+    const update = () => setOpen(getOpeningStatus(new Date(), type).open)
     update()
     const id = setInterval(update, 60_000)
     return () => clearInterval(id)
-  }, [])
+  }, [type])
   return open
 }
 
