@@ -7,6 +7,7 @@ import { CartProvider } from '@/components/cart/cart-context'
 import MobileCart from '@/components/cart/mobile-cart'
 import Footer from '@/components/footer'
 import { getOpeningHoursSchema } from '@/lib/opening-hours'
+import { DELIVERY_AREAS } from '@/lib/postal-codes'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -69,6 +70,26 @@ const restaurantJsonLd = {
   url: 'https://www.luma-pizza.de',
   email: 'info@luma-pizza.de',
   telephone: '+4915124882899',
+  // Ohne Bild zeigt Google den Eintrag in den lokalen Ergebnissen ohne Vorschau.
+  image: 'https://www.luma-pizza.de/opengraph-image.png',
+  // Preisniveau: Hauptgerichte zwischen 10 und 21 € → zweistufig.
+  priceRange: '€€',
+  hasMenu: 'https://www.luma-pizza.de/speisekarte',
+  paymentAccepted: 'Bargeld, Kreditkarte, PayPal',
+  currenciesAccepted: 'EUR',
+  // Die Orte, in die wir liefern — die Grundlage für Suchen wie
+  // „Pizza Lieferservice Heilsbronn".
+  areaServed: DELIVERY_AREAS.map(a => ({
+    '@type': 'City',
+    name: a.name,
+    address: {
+      '@type': 'PostalAddress',
+      postalCode: a.postalCode,
+      addressLocality: a.name,
+      addressCountry: 'DE',
+    },
+  })),
+  hasDeliveryMethod: ['http://purl.org/goodrelations/v1#DeliveryModeOwnFleet', 'http://purl.org/goodrelations/v1#DeliveryModePickUp'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

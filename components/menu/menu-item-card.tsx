@@ -4,6 +4,7 @@ import { MenuItem } from '@/lib/types'
 import { useCart } from '@/components/cart/cart-context'
 import { useState } from 'react'
 import { getImageForItem } from '@/lib/images'
+import { getAllergene, formatAllergenCodes } from '@/lib/allergene'
 
 interface Props {
   item: MenuItem
@@ -11,6 +12,7 @@ interface Props {
 
 export default function MenuItemCard({ item }: Props) {
   const { dispatch } = useCart()
+  const allergene = getAllergene(item.id)
   const [selectedSize, setSelectedSize] = useState<'33cm' | '45cm'>('33cm')
   const hasSides = item.sides !== undefined && item.sides.length > 0
   const [selectedSide, setSelectedSide] = useState<string>(item.sides?.[0] ?? '')
@@ -95,6 +97,17 @@ export default function MenuItemCard({ item }: Props) {
         {item.description && (
           <p className="text-sm text-charcoal-600 leading-relaxed mb-4 line-clamp-2 min-h-[2.5rem]">
             {item.description}
+          </p>
+        )}
+
+        {/* Allergene — sichtbar, sobald Kadir die Liste freigegeben hat
+            (lib/allergene.ts). Bis dahin liefert getAllergene() null. */}
+        {allergene && (
+          <p className="text-xs text-charcoal-500 mb-4 -mt-2">
+            Allergene:{' '}
+            <span className="font-medium text-charcoal-700">
+              {formatAllergenCodes(allergene) || 'keine der 14 Hauptallergene'}
+            </span>
           </p>
         )}
 

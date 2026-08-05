@@ -31,15 +31,15 @@ export default function Navbar({ transparent = false }: Props) {
 
   const links: { href: string; label: string }[] = onHomepage
     ? [
+        { href: '/speisekarte', label: 'Speisekarte' },
+        { href: '/liefergebiet', label: 'Liefergebiet' },
         { href: '#story', label: 'Über uns' },
-        { href: '/bestellen', label: 'Speisekarte' },
-        { href: '#galerie', label: 'Galerie' },
         { href: '#kontakt', label: 'Kontakt' },
       ]
     : [
         { href: '/', label: 'Start' },
-        { href: '/bestellen', label: 'Speisekarte' },
-        { href: '/#story', label: 'Über uns' },
+        { href: '/speisekarte', label: 'Speisekarte' },
+        { href: '/liefergebiet', label: 'Liefergebiet' },
         { href: '/#kontakt', label: 'Kontakt' },
       ]
 

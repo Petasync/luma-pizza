@@ -4,6 +4,7 @@ import Navbar from '@/components/navbar'
 import DeliveryMarquee from '@/components/delivery-marquee'
 import DeliveryBanner from '@/components/delivery-banner'
 import OpeningStatusBadge from '@/components/opening-status'
+import Karte from '@/components/karte'
 import { HERO_IMAGE, STORY_IMAGE, KITCHEN_IMAGE, GALLERY_IMAGES, getCategoryImage } from '@/lib/images'
 import { getScheduleRows } from '@/lib/opening-hours'
 import { DELIVERY_ETA_MINUTES, formatEta } from '@/lib/business'
@@ -41,7 +42,9 @@ export default function HomePage() {
       <Navbar transparent />
 
       {/* HERO */}
-      <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden">
+      {/* h-dvh statt h-screen: auf dem Handy zählt h-screen die Browserleiste mit,
+          dadurch rutscht der untere Rand des Heros unter die Adressleiste. */}
+      <section className="relative h-dvh min-h-[640px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src={HERO_IMAGE}
@@ -69,7 +72,7 @@ export default function HomePage() {
             <Link href="/bestellen" className="btn-gold">
               Jetzt bestellen
             </Link>
-            <Link href="#speisekarte" className="btn-outline-light">
+            <Link href="/speisekarte" className="btn-outline-light">
               Speisekarte ansehen
             </Link>
           </div>
@@ -185,8 +188,11 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/bestellen" className="btn-primary">
+              Jetzt bestellen
+            </Link>
+            <Link href="/speisekarte" className="btn-outline-dark">
               Gesamte Speisekarte
             </Link>
           </div>
@@ -335,7 +341,10 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <p className="text-xs text-gold-600 mt-3 max-w-xs">
-                  Lieferung in unser gesamtes Gebiet — <span className="font-medium">gratis</span>.
+                  Lieferung in unser gesamtes Gebiet — <span className="font-medium">gratis</span>.{' '}
+                  <Link href="/liefergebiet" className="underline underline-offset-2 hover:text-gold-700">
+                    Liefern wir zu dir?
+                  </Link>
                 </p>
               </div>
 
@@ -366,27 +375,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Karte (OpenStreetMap-Embed, kein API-Key, kein Tracking) */}
+        {/* Karte (OpenStreetMap) — lädt erst auf Klick, siehe components/karte.tsx */}
         <div className="container-wide mt-16 px-4 sm:px-6 lg:px-12">
-          <div className="aspect-[16/7] w-full border border-charcoal-900/10 bg-cream-50 overflow-hidden">
-            <iframe
-              title="Luma Pizza, Warzfeldener Straße 1-3, Dietenhofen"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=10.6837%2C49.3941%2C10.6937%2C49.4001&layer=mapnik&marker=49.3970650%2C10.6887029"
-              loading="lazy"
-              className="w-full h-full"
-              style={{ border: 0 }}
-            />
-          </div>
-          <p className="text-xs text-charcoal-500 mt-3 text-center">
-            <a
-              href="https://www.openstreetmap.org/?mlat=49.3970650&mlon=10.6887029#map=18/49.3970650/10.6887029"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-gold-600"
-            >
-              In größerer Karte ansehen ↗
-            </a>
-          </p>
+          <Karte />
         </div>
       </section>
     </>
