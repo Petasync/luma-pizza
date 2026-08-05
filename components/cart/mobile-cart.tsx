@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from './cart-context'
 import CartItemRow from './cart-item'
+import { formatEuro } from '@/lib/business'
 
 /**
  * Mobile-Warenkorb: schwebender Button rechts unten + Slide-in-Drawer
@@ -61,7 +62,7 @@ export default function MobileCart() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label={`Warenkorb öffnen (${itemCount} Artikel, ${total.toFixed(2)} €)`}
+          aria-label={`Warenkorb öffnen (${itemCount} Artikel, ${formatEuro(total)})`}
           className={`lg:hidden fixed right-5 z-50 flex items-center gap-3 bg-charcoal-900 text-cream-50 pl-4 pr-5 py-3 shadow-2xl border border-gold-500/30 hover:bg-gold-600 active:scale-95 transition-transform duration-300 ${
             pulse ? 'scale-110' : 'scale-100'
           }`}
@@ -77,7 +78,7 @@ export default function MobileCart() {
               {itemCount}
             </span>
           </span>
-          <span className="font-serif text-base tabular-nums">{total.toFixed(2)} €</span>
+          <span className="font-serif text-base tabular-nums">{formatEuro(total)}</span>
         </button>
       )}
 
@@ -140,7 +141,7 @@ export default function MobileCart() {
             <div className="px-5 py-4 border-t border-charcoal-900/10 bg-cream-100 space-y-2 flex-shrink-0">
               <div className="flex justify-between text-sm text-charcoal-600">
                 <span>Zwischensumme</span>
-                <span className="tabular-nums">{total.toFixed(2)} €</span>
+                <span className="tabular-nums">{formatEuro(total)}</span>
               </div>
               <div className="flex justify-between text-sm text-charcoal-600">
                 <span>Liefergebühr</span>
@@ -148,7 +149,7 @@ export default function MobileCart() {
               </div>
               <div className="flex justify-between font-serif text-xl text-charcoal-900 pt-3 border-t border-charcoal-900/10">
                 <span>Gesamt</span>
-                <span className="tabular-nums">{total.toFixed(2)} €</span>
+                <span className="tabular-nums">{formatEuro(total)}</span>
               </div>
             </div>
 

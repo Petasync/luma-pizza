@@ -63,10 +63,10 @@ export default function DatenschutzPage() {
           <section className="pt-8 border-t border-charcoal-900/10">
             <p className="eyebrow mb-3">Zahlungsdienstleister</p>
             <p className="text-charcoal-700 leading-relaxed">
-              Für Online-Zahlungen nutzen wir Stripe (Stripe Payments Europe Ltd., Dublin) und
-              PayPal (PayPal (Europe) S.à r.l. et Cie, Luxemburg). Diese Anbieter verarbeiten
-              Zahlungsdaten in eigener Verantwortung gemäß ihren jeweiligen Datenschutz­
-              richtlinien. Wir selbst speichern keine Karten- oder Kontodaten.
+              Für Online-Zahlungen nutzen wir Stripe (Stripe Payments Europe Ltd., Dublin).
+              Stripe verarbeitet Zahlungsdaten in eigener Verantwortung gemäß der eigenen
+              Datenschutzrichtlinie. Wir selbst speichern keine Karten- oder Kontodaten.
+              Bei Barzahlung werden keine Zahlungsdaten an Dritte übermittelt.
             </p>
           </section>
 

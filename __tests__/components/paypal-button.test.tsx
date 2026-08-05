@@ -26,12 +26,32 @@ describe('PayPalButton', () => {
   const onBeforeConfirm = jest.fn()
   const onSuccess = jest.fn()
   const onError = jest.fn()
+  const urspruenglicheKennung = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
   beforeEach(() => {
     onBeforeConfirm.mockReset()
     onSuccess.mockReset()
     onError.mockReset()
     letztePayPalButtonsProps = undefined
+    // Der Knopf erscheint nur mit gesetzter Kennung — für die Ablauf-Tests
+    // simulieren wir ein eingerichtetes PayPal-Konto.
+    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID = 'test-kennung'
+  })
+
+  afterAll(() => {
+    if (urspruenglicheKennung === undefined) delete process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    else process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID = urspruenglicheKennung
+  })
+
+  it('zeigt ohne hinterlegte Kennung keinen Knopf, sondern einen Hinweis', () => {
+    // Früher fiel die Komponente auf PayPals Testumgebung ('sb') zurück: Der Knopf
+    // sah funktionsfähig aus, echte Kunden konnten damit aber nicht bezahlen.
+    delete process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+    const { getByText } = render(
+      <PayPalButton amount={17} onBeforeConfirm={onBeforeConfirm} onSuccess={onSuccess} onError={onError} />,
+    )
+    expect(getByText(/steht derzeit nicht zur Verfügung/)).toBeInTheDocument()
+    expect(letztePayPalButtonsProps).toBeUndefined()
   })
 
   function renderButton() {

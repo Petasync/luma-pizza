@@ -5,6 +5,7 @@ import { useCart } from '@/components/cart/cart-context'
 import { useState } from 'react'
 import { getImageForItem } from '@/lib/images'
 import { getAllergene, formatAllergenCodes } from '@/lib/allergene'
+import { formatEuro } from '@/lib/business'
 
 interface Props {
   item: MenuItem
@@ -89,7 +90,7 @@ export default function MenuItemCard({ item }: Props) {
           <h3 className="font-serif text-lg leading-tight text-charcoal-900">{item.name}</h3>
           {price !== undefined && (
             <p className="font-serif text-lg text-gold-600 whitespace-nowrap">
-              {price.toFixed(2)} €
+              {formatEuro(price)}
             </p>
           )}
         </div>

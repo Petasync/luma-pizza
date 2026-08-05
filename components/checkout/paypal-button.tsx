@@ -16,7 +16,19 @@ interface Props {
 }
 
 export default function PayPalButton({ amount, onBeforeConfirm, onSuccess, onError }: Props) {
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'sb'
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+  // Früher stand hier als Rückfall `'sb'` — PayPals Testumgebung. Ohne gesetzte
+  // Kennung erschien dadurch ein funktionsfähig aussehender Knopf, über den echte
+  // Kunden nicht bezahlen können und über den eine Testzahlung eine Bestellung
+  // als bezahlt markiert hätte. Ohne Kennung gibt es jetzt keinen Knopf.
+  if (!clientId) {
+    return (
+      <p className="text-sm text-charcoal-600">
+        PayPal steht derzeit nicht zur Verfügung. Bitte wähle Karte oder Barzahlung.
+      </p>
+    )
+  }
+
   return (
     <PayPalScriptProvider options={{ clientId, currency: 'EUR', disableFunding: 'sepa' }}>
       <PayPalButtons

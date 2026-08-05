@@ -3,7 +3,7 @@ import { Order } from '@/lib/types'
 import Navbar from '@/components/navbar'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { DELIVERY_ETA_MINUTES, PICKUP_ETA_MINUTES, formatEta } from '@/lib/business'
+import { DELIVERY_ETA_MINUTES, PICKUP_ETA_MINUTES, formatEta, formatEuro } from '@/lib/business'
 import OrderStatusTracker from '@/components/order-status-tracker'
 
 export default async function OrderConfirmationPage(props: { params: Promise<{ id: string }> }) {
@@ -88,7 +88,7 @@ export default async function OrderConfirmationPage(props: { params: Promise<{ i
                     {item.size && <p className="text-xs text-charcoal-500">{item.size}</p>}
                   </div>
                   <p className="font-serif text-charcoal-900">
-                    {(item.price * item.quantity).toFixed(2)} €
+                    {formatEuro(item.price * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -96,7 +96,7 @@ export default async function OrderConfirmationPage(props: { params: Promise<{ i
 
             <div className="flex justify-between items-center pt-6 border-t border-charcoal-900/10">
               <p className="font-serif text-xl">Gesamt</p>
-              <p className="font-serif text-2xl text-gold-600">{Number(order.total_price).toFixed(2)} €</p>
+              <p className="font-serif text-2xl text-gold-600">{formatEuro(Number(order.total_price))}</p>
             </div>
           </div>
 

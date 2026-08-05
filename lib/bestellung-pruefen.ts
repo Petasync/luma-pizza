@@ -3,6 +3,7 @@ import { priceCart, PricedCart, PricingError } from './pricing'
 import { isDeliverable } from './postal-codes'
 import { isOpen, getOpeningStatus } from './opening-hours'
 import { getMinOrderForPostalCode } from './business'
+import { istZahlartVerfuegbar } from './zahlarten'
 
 /**
  * Alle Regeln, die erfüllt sein müssen, BEVOR Geld fließt.
@@ -21,6 +22,14 @@ export interface Pruefergebnis {
 }
 
 export function pruefeBestellung(body: CreateOrderPayload, jetzt: Date = new Date()): Pruefergebnis {
+  // --- Zahlart überhaupt freigeschaltet? ---
+  // PayPal ist derzeit aus (kein Geschäftskonto, siehe lib/zahlarten.ts). Die
+  // Auswahl verschwindet dadurch schon im Bezahlschritt; hier steht die
+  // serverseitige Sperre, damit auch ein selbst gebauter Aufruf nicht durchkommt.
+  if (!istZahlartVerfuegbar(body.payment_method)) {
+    return { fehler: { nachricht: 'Diese Zahlungsart steht derzeit nicht zur Verfügung.', status: 400 } }
+  }
+
   // --- Öffnungszeiten ---
   if (!isOpen(jetzt)) {
     const status = getOpeningStatus(jetzt)

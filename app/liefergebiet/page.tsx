@@ -65,7 +65,7 @@ const FAQ: { frage: string; antwort: string }[] = [
   },
   {
     frage: 'Wie kann ich bezahlen?',
-    antwort: 'Online per Kreditkarte oder PayPal — oder bar bei der Lieferung beziehungsweise bei der Abholung.',
+    antwort: 'Online per Kreditkarte oder Klarna — oder bar bei der Lieferung beziehungsweise bei der Abholung.',
   },
   {
     frage: 'Kann ich auch telefonisch bestellen?',

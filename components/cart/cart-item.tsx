@@ -1,6 +1,7 @@
 'use client'
 import { CartItem as CartItemType } from '@/lib/types'
 import { useCart } from './cart-context'
+import { formatEuro } from '@/lib/business'
 
 interface Props {
   item: CartItemType
@@ -14,7 +15,7 @@ export default function CartItemRow({ item }: Props) {
         <p className="text-sm font-medium text-charcoal-900 leading-tight">{item.name}</p>
         {item.size && <p className="text-xs text-charcoal-500 mt-0.5">{item.size}</p>}
         <p className="text-xs text-gold-600 mt-1 font-medium">
-          {item.price.toFixed(2)} € / Stk.
+          {formatEuro(item.price)} / Stk.
         </p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
@@ -36,7 +37,7 @@ export default function CartItemRow({ item }: Props) {
           </button>
         </div>
         <span className="font-serif text-sm text-charcoal-900 w-16 text-right tabular-nums">
-          {(item.price * item.quantity).toFixed(2)} €
+          {formatEuro(item.price * item.quantity)}
         </span>
       </div>
     </div>

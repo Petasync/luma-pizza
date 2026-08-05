@@ -1,6 +1,7 @@
 'use client'
 import { Order } from '@/lib/types'
 import { ordersToday, calcAvgPrepTime, formatMinutes } from '@/lib/order-priority'
+import { formatEuro } from '@/lib/business'
 
 interface Props {
   orders: Order[]
@@ -20,8 +21,8 @@ export default function StatsHeader({ orders }: Props) {
     },
     {
       label: 'Umsatz heute',
-      value: `${revenue.toFixed(2)} €`,
-      hint: today.length > 0 ? `Ø ${(revenue / today.length).toFixed(2)} €` : 'Heute noch keine',
+      value: formatEuro(revenue),
+      hint: today.length > 0 ? `Ø ${formatEuro(revenue / today.length)}` : 'Heute noch keine',
     },
     {
       label: 'Ø Bearbeitungszeit',
