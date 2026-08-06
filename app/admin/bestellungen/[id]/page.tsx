@@ -1,5 +1,6 @@
 import { createSupabaseServer } from '@/lib/supabase-server'
 import { Order } from '@/lib/types'
+import { formatEuro } from '@/lib/business'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
@@ -75,13 +76,13 @@ export default async function AdminOrderDetail(props: { params: Promise<{ id: st
                     </p>
                     {item.size && <p className="text-xs text-charcoal-500">{item.size}</p>}
                   </div>
-                  <p className="font-serif text-charcoal-900">{(item.price * item.quantity).toFixed(2)} €</p>
+                  <p className="font-serif text-charcoal-900">{formatEuro(item.price * item.quantity)}</p>
                 </div>
               ))}
             </div>
             <div className="flex justify-between items-center pt-4 mt-4 border-t border-charcoal-900/10">
               <p className="font-serif text-lg">Gesamt</p>
-              <p className="font-serif text-2xl text-gold-600">{Number(order.total_price).toFixed(2)} €</p>
+              <p className="font-serif text-2xl text-gold-600">{formatEuro(Number(order.total_price))}</p>
             </div>
           </div>
         </div>

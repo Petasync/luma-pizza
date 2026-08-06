@@ -11,12 +11,14 @@ import PayPalButton from '@/components/checkout/paypal-button'
 import ClosedBanner from '@/components/closed-banner'
 import { useIsOpen } from '@/components/opening-status'
 import { OrderType, PaymentMethod } from '@/lib/types'
+import { PAYPAL_AKTIV, VERFUEGBARE_ZAHLARTEN } from '@/lib/zahlarten'
 import {
   DELIVERY_ETA_MINUTES,
+  DELIVERY_FEE,
   PICKUP_ETA_MINUTES,
-  PAYPAL_AKTIV,
   getMinOrderForPostalCode,
   formatEta,
+  formatEuro,
 } from '@/lib/business'
 import Link from 'next/link'
 
@@ -201,7 +203,7 @@ export default function CheckoutPage() {
                         if (!contact.name || !contact.email || !contact.phone) { setError('Bitte alle Pflichtfelder ausfüllen.'); return }
                         if (orderType === 'delivery' && !contact.street) { setError('Bitte Straße angeben.'); return }
                         if (belowMinOrder) {
-                          setError(`Mindestbestellwert für Lieferung: ${minOrder},00 €. Noch ${missingForDelivery.toFixed(2).replace('.', ',')} € fehlen.`)
+                          setError(`Mindestbestellwert für Lieferung: ${formatEuro(minOrder)}. Noch ${formatEuro(missingForDelivery)} fehlen.`)
                           return
                         }
                         setError('')
@@ -226,12 +228,12 @@ export default function CheckoutPage() {
                   <h2 className="font-serif text-2xl text-charcoal-900 mb-5">Zahlungsmethode</h2>
                 </div>
 
-                <div className={`grid gap-2 ${PAYPAL_AKTIV ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                  {([
-                    { m: 'card' as const, label: 'Karte / Klarna' },
-                    ...(PAYPAL_AKTIV ? [{ m: 'paypal' as const, label: 'PayPal' }] : []),
-                    { m: 'cash' as const, label: 'Bar' },
-                  ]).map(({ m, label }) => (
+                <div
+                  className={`grid gap-2 ${
+                    VERFUEGBARE_ZAHLARTEN.length === 3 ? 'grid-cols-3' : 'grid-cols-2'
+                  }`}
+                >
+                  {VERFUEGBARE_ZAHLARTEN.map(({ m, label }) => (
                     <button
                       key={m}
                       onClick={() => setPaymentMethod(m)}
@@ -292,7 +294,7 @@ export default function CheckoutPage() {
                           onError={msg => setError(msg)}
                         />
                       )}
-                      {paymentMethod === 'paypal' && (
+                      {paymentMethod === 'paypal' && PAYPAL_AKTIV && (
                         <PayPalButton
                           amount={total}
                           onBeforeConfirm={merkeBestellungVorPayPal}
@@ -338,7 +340,7 @@ export default function CheckoutPage() {
                     {i.size && <p className="text-xs text-charcoal-500">{i.size}</p>}
                   </div>
                   <p className="font-serif text-charcoal-900 whitespace-nowrap">
-                    {(i.price * i.quantity).toFixed(2)} €
+                    {formatEuro(i.price * i.quantity)}
                   </p>
                 </div>
               ))}
@@ -346,21 +348,21 @@ export default function CheckoutPage() {
             <div className="p-5 border-t border-charcoal-900/10 bg-cream-100 space-y-2">
               <div className="flex justify-between text-sm text-charcoal-600">
                 <span>Zwischensumme</span>
-                <span>{total.toFixed(2)} €</span>
+                <span>{formatEuro(total)}</span>
               </div>
               <div className="flex justify-between text-sm text-charcoal-600">
                 <span>Liefergebühr</span>
-                <span className="text-gold-600">0,00 €</span>
+                <span className="text-gold-600">{formatEuro(DELIVERY_FEE)}</span>
               </div>
               {belowMinOrder && (
                 <div className="text-xs text-wine-600 pt-2 border-t border-wine-600/20">
-                  Mindestbestellwert für Lieferung {minOrder},00 € — noch{' '}
-                  <span className="font-medium">{missingForDelivery.toFixed(2).replace('.', ',')} €</span> fehlen.
+                  Mindestbestellwert für Lieferung {formatEuro(minOrder)} — noch{' '}
+                  <span className="font-medium">{formatEuro(missingForDelivery)}</span> fehlen.
                 </div>
               )}
               <div className="flex justify-between font-serif text-xl text-charcoal-900 pt-3 border-t border-charcoal-900/10">
                 <span>Gesamt</span>
-                <span>{total.toFixed(2)} €</span>
+                <span>{formatEuro(total)}</span>
               </div>
             </div>
           </aside>

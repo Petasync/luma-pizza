@@ -26,17 +26,6 @@ export function getMinOrderForPostalCode(postalCode?: string | null): number {
 /** Liefergebühr in Euro. Aktuell gratis im gesamten Liefergebiet. */
 export const DELIVERY_FEE = 0
 
-/**
- * PayPal als Zahlart an der Kasse. Am 05.08.2026 vorübergehend abgeschaltet.
- *
- * Nur der Auswahlknopf verschwindet — die komplette PayPal-Anbindung
- * (`lib/paypal.ts`, `/api/paypal/webhook`, der Abgleich in der Nachtwache)
- * bleibt absichtlich bestehen: bereits bezahlte PayPal-Bestellungen müssen
- * weiterhin angezeigt, geprüft und abgeglichen werden können. Zum
- * Wiedereinschalten genügt es, hier auf `true` zu setzen.
- */
-export const PAYPAL_AKTIV = false
-
 export interface EtaRange {
   min: number
   max: number

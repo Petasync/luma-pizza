@@ -177,11 +177,12 @@ Auf der Startseite steht „5,0 ★" mit drei echten Google-Zitaten.
 
 ## D — Was Petasync noch erledigt (nur zur Info)
 
-- [ ] **PayPal-Absicherung fertigstellen.** Bei Stripe (Kartenzahlung) meldet der
-      Zahlungsanbieter jede Zahlung direkt an unseren Server — dadurch kann keine
-      Bestellung mehr verloren gehen. Bei PayPal fehlt diese Meldung noch; dort fängt
-      aktuell nur die nächtliche Kontrolle einen Ausfall auf. **Erledigt Petasync
-      diese Woche.**
+- [x] **PayPal von der Seite genommen** (05.08.). Weil das PayPal-Geschäftskonto
+      abgelehnt wurde, gab es kein Konto, auf dem Geld ankommen konnte — der
+      PayPal-Knopf stand aber weiter im Bezahlschritt. Wer ihn wählte, konnte nicht
+      bezahlen und brach die Bestellung ab. Jetzt stehen dort nur noch **Karte /
+      Klarna** und **Bar**. Der PayPal-Teil bleibt im Hintergrund liegen: Kommt
+      später doch ein Konto, ist es bei uns ein Handgriff.
 - [ ] Die **51,50 €** vom 26. Juli sind noch nicht nachgetragen — nachholen.
 - [ ] Bestell-Laptop einmal neu starten (danach meldet er sich ein Jahr lang nicht mehr ab).
 - [ ] Neue Seiten (Speisekarte zum Nachlesen, Liefergebiet, häufige Fragen) gehen
@@ -196,6 +197,9 @@ Auf der Startseite steht „5,0 ★" mit drei echten Google-Zitaten.
   zusätzlich direkt an unseren Server. Dazu läuft jede Nacht um 6 Uhr eine
   automatische Kontrolle, die offene Zahlungen abgleicht und liegengebliebene
   E-Mails nachschickt.
+- **Bezahlen geht jetzt per Karte/Klarna oder bar** — PayPal ist raus, solange
+  es kein Geschäftskonto gibt. Falls das Konto doch noch kommt: einmal Bescheid
+  sagen, dann ist es in fünf Minuten wieder drin.
 - **Der Bestell-Laptop meldet sich nicht mehr stillschweigend ab.** Das war die
   zweite Ursache am 26. Juli: Der Laptop zeigte eine normale Seite, bekam aber
   keine Bestellungen mehr. Jetzt erneuert er die Anmeldung selbst — und wenn doch

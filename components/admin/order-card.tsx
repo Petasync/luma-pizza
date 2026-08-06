@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Order } from '@/lib/types'
 import { getPriority, minutesSince, formatMinutes } from '@/lib/order-priority'
 import StatusButtons, { STATUS_LABELS } from './status-buttons'
+import { formatEuro } from '@/lib/business'
 
 interface Props {
   order: Order
@@ -68,7 +69,7 @@ export default function OrderCard({ order, onStatusUpdate }: Props) {
         </div>
 
         <div className="text-right flex-shrink-0">
-          <p className="font-serif text-xl text-gold-600">{Number(order.total_price).toFixed(2)} €</p>
+          <p className="font-serif text-xl text-gold-600">{formatEuro(Number(order.total_price))}</p>
           <p className="text-[10px] uppercase tracking-widest text-charcoal-500 mt-1">
             {order.payment_method} · {order.payment_status === 'paid' ? '✓' : 'offen'}
           </p>

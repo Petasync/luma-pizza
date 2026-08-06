@@ -75,7 +75,8 @@ const restaurantJsonLd = {
   // Preisniveau: Hauptgerichte zwischen 10 und 21 € → zweistufig.
   priceRange: '€€',
   hasMenu: 'https://www.luma-pizza.de/speisekarte',
-  paymentAccepted: 'Bargeld, Kreditkarte, PayPal',
+  // PayPal fehlt hier bewusst — siehe lib/zahlarten.ts.
+  paymentAccepted: 'Bargeld, Kreditkarte',
   currenciesAccepted: 'EUR',
   // Die Orte, in die wir liefern — die Grundlage für Suchen wie
   // „Pizza Lieferservice Heilsbronn".

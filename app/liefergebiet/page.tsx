@@ -27,9 +27,13 @@ import {
 
 const ORTE_TEXT = DELIVERY_AREAS.map(a => a.name).join(', ')
 
+// Aus dem Fahrplan abgeleitet statt fest eingetragen — sonst laufen Fließtext
+// und Öffnungszeiten wieder auseinander, sobald sich die Zeiten ändern.
+const LIEFER_START = getScheduleRows('delivery')[0].hours.split(' – ')[0]
+
 const BESCHREIBUNG =
   `Luma Pizza liefert gratis nach ${DELIVERY_AREAS.slice(0, 6).map(a => a.name).join(', ')} ` +
-  `und in weitere Orte rund um Dietenhofen. Lieferzeit ${formatEta(DELIVERY_ETA_MINUTES)}, täglich ab 15 Uhr.`
+  `und in weitere Orte rund um Dietenhofen. Lieferzeit ${formatEta(DELIVERY_ETA_MINUTES)}, täglich ab ${LIEFER_START} Uhr.`
 
 export const metadata: Metadata = {
   title: 'Liefergebiet & häufige Fragen — Luma Pizza Dietenhofen',
@@ -65,7 +69,7 @@ const FAQ: { frage: string; antwort: string }[] = [
   },
   {
     frage: 'Wie kann ich bezahlen?',
-    antwort: 'Online per Kreditkarte oder PayPal — oder bar bei der Lieferung beziehungsweise bei der Abholung.',
+    antwort: 'Online per Kreditkarte oder Klarna — oder bar bei der Lieferung beziehungsweise bei der Abholung.',
   },
   {
     frage: 'Kann ich auch telefonisch bestellen?',
@@ -105,7 +109,7 @@ export default function LiefergebietPage() {
               Wir liefern rund um Dietenhofen
             </h1>
             <p className="text-cream-100/70 mt-4 max-w-xl mx-auto">
-              In {DELIVERY_AREAS.length} Orte — gratis, täglich ab 15 Uhr, in der Regel
+              In {DELIVERY_AREAS.length} Orte — gratis, täglich ab {LIEFER_START} Uhr, in der Regel
               innerhalb von {formatEta(DELIVERY_ETA_MINUTES)}.
             </p>
           </div>

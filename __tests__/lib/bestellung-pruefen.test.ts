@@ -54,12 +54,12 @@ describe('pruefeBestellung', () => {
     expect(abholung.fehler).toBeUndefined()
   })
 
-  // PayPal ist seit 05.08.2026 abgeschaltet (business.ts PAYPAL_AKTIV). Der
-  // Knopf ist an der Kasse weg — die Ablehnung muss aber serverseitig greifen.
+  // PayPal ist abgeschaltet (lib/zahlarten.ts PAYPAL_AKTIV). Der Knopf ist an
+  // der Kasse weg — die Ablehnung muss aber serverseitig greifen.
   it('lehnt eine PayPal-Bestellung ab, solange PayPal abgeschaltet ist', () => {
     const { fehler } = pruefeBestellung(payload({ payment_method: 'paypal' }), GEOEFFNET)
     expect(fehler?.status).toBe(400)
-    expect(fehler?.nachricht).toMatch(/PayPal/i)
+    expect(fehler?.nachricht).toMatch(/Zahlungsart/i)
   })
 
   it('verlangt vollständige Kontaktdaten', () => {

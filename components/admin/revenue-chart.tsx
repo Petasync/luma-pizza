@@ -1,6 +1,7 @@
 'use client'
 import { Order } from '@/lib/types'
 import { ordersToday, revenueByHour } from '@/lib/order-priority'
+import { formatEuro } from '@/lib/business'
 
 interface Props {
   orders: Order[]
@@ -21,7 +22,7 @@ export default function RevenueChart({ orders }: Props) {
           <p className="text-[10px] uppercase tracking-widest text-charcoal-500 mb-1">
             Umsatz heute · stündlich
           </p>
-          <p className="font-serif text-2xl text-charcoal-900">{total.toFixed(2)} €</p>
+          <p className="font-serif text-2xl text-charcoal-900">{formatEuro(total)}</p>
         </div>
         <p className="text-[10px] uppercase tracking-widest text-gold-600">
           Live

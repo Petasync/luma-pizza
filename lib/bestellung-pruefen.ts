@@ -2,7 +2,8 @@ import { CreateOrderPayload } from './types'
 import { priceCart, PricedCart, PricingError } from './pricing'
 import { isDeliverable } from './postal-codes'
 import { isOpen, getOpeningStatus } from './opening-hours'
-import { getMinOrderForPostalCode, PAYPAL_AKTIV } from './business'
+import { getMinOrderForPostalCode } from './business'
+import { istZahlartVerfuegbar } from './zahlarten'
 
 /**
  * Alle Regeln, die erfüllt sein müssen, BEVOR Geld fließt.
@@ -21,6 +22,14 @@ export interface Pruefergebnis {
 }
 
 export function pruefeBestellung(body: CreateOrderPayload, jetzt: Date = new Date()): Pruefergebnis {
+  // --- Zahlart überhaupt freigeschaltet? ---
+  // PayPal ist derzeit aus (kein Geschäftskonto, siehe lib/zahlarten.ts). Die
+  // Auswahl verschwindet dadurch schon im Bezahlschritt; hier steht die
+  // serverseitige Sperre, damit auch ein selbst gebauter Aufruf nicht durchkommt.
+  if (!istZahlartVerfuegbar(body.payment_method)) {
+    return { fehler: { nachricht: 'Diese Zahlungsart steht derzeit nicht zur Verfügung.', status: 400 } }
+  }
+
   // --- Öffnungszeiten (Abholung ab 11:00, Lieferung erst ab 17:00) ---
   if (!isOpen(jetzt, body.type)) {
     const status = getOpeningStatus(jetzt, body.type)
@@ -32,14 +41,6 @@ export function pruefeBestellung(body: CreateOrderPayload, jetzt: Date = new Dat
       return { fehler: { nachricht: `Wir liefern gerade nicht.${wann}${abholbar}`, status: 503 } }
     }
     return { fehler: { nachricht: `Wir nehmen aktuell keine Abholbestellungen entgegen.${wann}`, status: 503 } }
-  }
-
-  // --- Zahlart ---
-  // Der ausgeblendete Knopf an der Kasse hält nur den Browser ab; ein von Hand
-  // gebauter Request käme sonst weiterhin durch und legte eine PayPal-Bestellung
-  // an, die niemand mehr bezahlen kann.
-  if (body.payment_method === 'paypal' && !PAYPAL_AKTIV) {
-    return { fehler: { nachricht: 'PayPal steht derzeit nicht zur Verfügung.', status: 400 } }
   }
 
   // --- Pflichtfelder ---
