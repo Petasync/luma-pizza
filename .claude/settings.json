@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(.env)",
+      "Write(.env)",
+      "Edit(.env.*)",
+      "Write(.env.*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/nach-edit-check.js",
+            "asyncRewake": true,
+            "timeout": 300,
+            "statusMessage": "Typecheck+Lint läuft…"
+          }
+        ]
+      }
+    ]
+  }
+}
