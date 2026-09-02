@@ -90,6 +90,17 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-cream-100/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-cream-100/50">
           <p>© {new Date().getFullYear()} Luma Pizza. Alle Rechte vorbehalten.</p>
           <p className="tracking-wider uppercase">Mit Liebe gekocht.</p>
+          <p>
+            Website von{' '}
+            <a
+              href="https://petasync.de"
+              target="_blank"
+              rel="noopener"
+              className="text-cream-100/70 hover:text-gold-400 transition-colors"
+            >
+              Petasync
+            </a>
+          </p>
         </div>
       </div>
     </footer>
