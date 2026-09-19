@@ -45,6 +45,12 @@ export async function GET(req: NextRequest) {
   }
 
   const meldungen: string[] = []
+  // Getrennt von `meldungen`: nur ECHTE technische Ausfälle (z. B. der Abgleich
+  // mit Stripe selbst schlägt fehl) landen hier und lösen den /fail-Ping an die
+  // Ablauf-Tafel aus. Geschäftliche Befunde (🚨 in `meldungen`, z. B. "Zahlung
+  // ohne Bestellung") laufen technisch einwandfrei durch — die gehen über den
+  // normalen Meldeweg (Mail unten), nicht über die Tafel.
+  const technischeAusfaelle: string[] = []
   const supabase = createSupabaseServer()
 
   // --- 1. Wecker ---------------------------------------------------------
@@ -112,7 +118,11 @@ export async function GET(req: NextRequest) {
       }
     }
   } catch (e) {
-    meldungen.push(`Abgleich mit Stripe fehlgeschlagen: ${e instanceof Error ? e.message : e}`)
+    // Der Abruf bei Stripe selbst ist gescheitert (Netz, API down) — das ist ein
+    // technischer Ausfall dieses Laufs, kein geschäftlicher Befund.
+    const text = `Abgleich mit Stripe fehlgeschlagen: ${e instanceof Error ? e.message : e}`
+    meldungen.push(text)
+    technischeAusfaelle.push(text)
   }
 
   // --- 4. Verwaiste Vormerkungen: erst prüfen, dann erst abstempeln --------
@@ -218,7 +228,16 @@ export async function GET(req: NextRequest) {
     ])
   }
 
-  await ablaufPing('luma-nachtwache', alarm ? 'Nachtwache meldet Auffälligkeiten' : undefined)
+  // An die Ablauf-Tafel geht nur der TECHNISCHE Status dieses Laufs. Ein
+  // geschäftlicher Befund (`alarm`, z. B. Zahlung ohne Bestellung) bedeutet
+  // NICHT, dass der Lauf fehlgeschlagen ist — der geht bereits oben per Mail
+  // raus. Nur ein echter technischer Ausfall (z. B. Stripe-Abgleich selbst
+  // gescheitert) ist ein /fail.
+  const technischerAusfall = technischeAusfaelle.length > 0
+  await ablaufPing(
+    'luma-nachtwache',
+    technischerAusfall ? technischeAusfaelle.join(' | ') : undefined,
+  )
 
   return NextResponse.json({
     ok: true,
