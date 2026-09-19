@@ -6,6 +6,7 @@ import { markiereAlsBezahlt, verschickeBestaetigungen } from '@/lib/bezahlung'
 import { sendeNachtwacheBericht } from '@/lib/resend'
 import { formatEuro } from '@/lib/business'
 import { Order } from '@/lib/types'
+import { ablaufPing } from '@/lib/ablauf-ping'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
       'Bitte im Supabase-Dashboard nachsehen, ob das Projekt pausiert ist.',
       'Solange das so ist, kann KEINE Bestellung gespeichert werden.',
     ])
+    await ablaufPing('luma-nachtwache', 'Datenbank nicht erreichbar')
     return NextResponse.json({ error: 'Datenbank nicht erreichbar.' }, { status: 500 })
   }
 
@@ -215,6 +217,8 @@ export async function GET(req: NextRequest) {
       ...meldungen,
     ])
   }
+
+  await ablaufPing('luma-nachtwache', alarm ? 'Nachtwache meldet Auffälligkeiten' : undefined)
 
   return NextResponse.json({
     ok: true,
